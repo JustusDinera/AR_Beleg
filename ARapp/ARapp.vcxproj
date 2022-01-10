@@ -11,17 +11,42 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ar_content.h" />
-    <ClInclude Include="ar_tracker.h" />
-    <ClInclude Include="finite_state_machine.h" />
-    <ClInclude Include="user_interface.h" />
+    <ClInclude Include="..\ARToolkit\include\AR\video.h" />
+    <ClInclude Include="ar_content.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="ar_tracker.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="finite_state_machine.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="user_interface.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ar_content.cpp" />
-    <ClCompile Include="ar_tracker.cpp" />
-    <ClCompile Include="finite_state_machine.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="user_interface.cpp" />
+    <ClCompile Include="ar_content.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="ar_tracker.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="finite_state_machine.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Quelle2.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="user_interface.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Models\Meat\Rawmeat.stl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{40077803-D287-4CD2-AF9C-B563661CA505}</ProjectGuid>

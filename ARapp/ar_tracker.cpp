@@ -18,7 +18,7 @@
 
 //--------- own libs -------------
 
-//#include <ar_content.h>
+#include <ar_content.h>
 
 
 
@@ -136,8 +136,9 @@ static int setupMarker(const char *patt_name, int *patt_id)
 
 // ---------- Init Marker type and path
 void init_marker(void)
-
 {
+	//arSetPatternDetectionMode(arHandle, AR_MATRIX_CODE_DETECTION);
+	//arSetMatrixCodeType(arHandle, AR_MATRIX_CODE_3x3_PARITY65);
 	// Define the ar-marker and path
 	const char *patt_name = "Data/patt.hiro";		
 

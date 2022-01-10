@@ -27,6 +27,9 @@
     <ClInclude Include="user_interface.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="..\ARToolkit\include\AR\video.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ar_content.cpp">
@@ -44,5 +47,13 @@
     <ClCompile Include="user_interface.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="Quelle2.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Models\Meat\Rawmeat.stl">
+      <Filter>Quelldateien</Filter>
+    </None>
   </ItemGroup>
 </Project>
