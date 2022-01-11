@@ -44,13 +44,51 @@
 //------- ARToolkit lips ----------
 #include <AR/gsub_lite.h>
 
-//------- Model Loader lips ----------
-#include "model_loader.h"
+//------- assimp lips ----------
+#include <assimp/cimport.h>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 //--------- own lips -------------
 //#include <finite_state_machine.h>
 //#include <ar_content.h>
 //#include <user_interface.h>
+
+// ============================================================================
+//	Global definitions
+// ============================================================================
+int loadasset(aiVector3D* scene_min, aiVector3D* scene_max, const C_STRUCT aiScene* scene, aiVector3D* scene_center);
+
+// the global Assimp scene object class
+
+class MODEL
+{
+public:
+	MODEL(char* path_model);
+	~MODEL();
+
+	const C_STRUCT aiScene * scene;
+	GLuint scene_list;
+	C_STRUCT aiVector3D scene_min, scene_max, scene_center;
+};
+MODEL::MODEL(char* path_model)
+{
+	//scene = NULL;
+	scene_list = 0;
+
+	// Load the model file.
+	scene = aiImportFile(path_model, aiProcessPreset_TargetRealtime_MaxQuality);
+
+	if (0 != loadasset(&scene_min, &scene_max, scene, &scene_center)) {
+		printf_s("Failed to load model. Please ensure that the specified file exists.");
+	}
+}
+
+MODEL::~MODEL()
+{
+}
+
+
 
 // ============================================================================
 //	Constants
@@ -60,9 +98,16 @@
 #define VIEW_DISTANCE_MIN		0.1			// Objects closer to the camera than this will not be displayed.
 #define VIEW_DISTANCE_MAX		100.0		// Objects further away from the camera than this will not be displayed.
 
+
+
+
 // ============================================================================
 //	Global variables
 // ============================================================================
+
+// the global Assimp scene 
+MODEL knife("../models/knife.stl");
+MODEL fish("../models/fish.obj");
 
 // Setup the size of the openGL Window
 static int prefWidth = 800;					// Fullscreen mode width.
@@ -70,6 +115,8 @@ static int prefHeight = 600;				// Fullscreen mode height.
 // Setup puffer depth and refresh rate
 static int prefDepth = 32;					// Fullscreen mode bit depth.
 static int prefRefresh = 0;					// Fullscreen mode refresh rate. Set to 0 to use default rate.
+
+
 
 
 
@@ -99,7 +146,8 @@ void init_marker(void);
 void get_bounding_box_for_node(const C_STRUCT aiNode* nd,
 	C_STRUCT aiVector3D* min,
 	C_STRUCT aiVector3D* max,
-	C_STRUCT aiMatrix4x4* trafo
+	C_STRUCT aiMatrix4x4* trafo,
+	const aiScene* scene
 ) {
 	C_STRUCT aiMatrix4x4 prev;
 	unsigned int n = 0, t;
@@ -125,20 +173,20 @@ void get_bounding_box_for_node(const C_STRUCT aiNode* nd,
 	}
 
 	for (n = 0; n < nd->mNumChildren; ++n) {
-		get_bounding_box_for_node(nd->mChildren[n], min, max, trafo);
+		get_bounding_box_for_node(nd->mChildren[n], min, max, trafo, scene);
 	}
 	*trafo = prev;
 }
 
 // set the bounds of the displayed area 
-void get_bounding_box(C_STRUCT aiVector3D* min, C_STRUCT aiVector3D* max)
+void get_bounding_box(C_STRUCT aiVector3D* min, C_STRUCT aiVector3D* max, const aiScene* C_STRUCT scene)
 {
 	C_STRUCT aiMatrix4x4 trafo;
 	aiIdentityMatrix4(&trafo);
 
 	min->x = min->y = min->z = 1e10f;
 	max->x = max->y = max->z = -1e10f;
-	get_bounding_box_for_node(scene->mRootNode, min, max, &trafo);
+	get_bounding_box_for_node(scene->mRootNode, min, max, &trafo, scene);
 }
 
 // convert a color array to a float array
@@ -239,7 +287,8 @@ void recursive_render(const C_STRUCT aiScene* sc, const C_STRUCT aiNode* nd)
 
 	/* draw all meshes assigned to this node */
 	for (; n < nd->mNumMeshes; ++n) {
-		const C_STRUCT aiMesh* mesh = scene->mMeshes[nd->mMeshes[n]];
+		//const C_STRUCT aiMesh* mesh = scene->mMeshes[nd->mMeshes[n]];
+		const C_STRUCT aiMesh* mesh = sc->mMeshes[nd->mMeshes[n]];
 
 		apply_material(sc->mMaterials[mesh->mMaterialIndex]);
 		/*
@@ -263,16 +312,14 @@ void recursive_render(const C_STRUCT aiScene* sc, const C_STRUCT aiNode* nd)
 			}
 
 			glBegin(face_mode);
-
-			for (i = 0; i < face->mNumIndices; i++) {
-				int index = face->mIndices[i];
-				if (mesh->mColors[0] != NULL)
-					glColor4fv((GLfloat*)&mesh->mColors[0][index]);
-				if (mesh->mNormals != NULL)
-					glNormal3fv(&mesh->mNormals[index].x);
-				glVertex3fv(&mesh->mVertices[index].x);
-			}
-
+				for (i = 0; i < face->mNumIndices; i++) {
+					int index = face->mIndices[i];
+					if (mesh->mColors[0] != NULL)
+						glColor4fv((GLfloat*)&mesh->mColors[0][index]);
+					if (mesh->mNormals != NULL)
+						glNormal3fv(&mesh->mNormals[index].x);
+					glVertex3fv(&mesh->mVertices[index].x);
+				}
 			glEnd();
 		}
 
@@ -287,17 +334,16 @@ void recursive_render(const C_STRUCT aiScene* sc, const C_STRUCT aiNode* nd)
 }
 
 // load the model to the scene
-int loadasset(const char* path)
+int loadasset(aiVector3D* scene_min, aiVector3D* scene_max, const C_STRUCT aiScene* scene, aiVector3D* scene_center)
 {
 	/* we are taking one of the postprocessing presets to avoid
 	   spelling out 20+ single postprocessing flags here. */
-	scene = aiImportFile(path, aiProcessPreset_TargetRealtime_MaxQuality);
 
 	if (scene) {
-		get_bounding_box(&scene_min, &scene_max);
-		scene_center.x = (scene_min.x + scene_max.x) / 2.0f;
-		scene_center.y = (scene_min.y + scene_max.y) / 2.0f;
-		scene_center.z = (scene_min.z + scene_max.z) / 2.0f;
+		get_bounding_box(scene_min, scene_max, scene);
+		scene_center->x = (scene_min->x + scene_max->x) / 2.0f;
+		scene_center->y = (scene_min->y + scene_max->y) / 2.0f;
+		scene_center->z = (scene_min->z + scene_max->z) / 2.0f;
 		return 0;
 	}
 	return 1;
@@ -330,6 +376,28 @@ static void Reshape(int w, int h)
 	// Call through to anyone else who needs to know about window sizing here.
 }
 
+//void load_model(const aiScene* scene, aiVector3D* scene_max, aiVector3D* scene_min, aiVector3D* scene_center, GLuint scene_list) {
+void load_model(MODEL model, ai_real x, ai_real y, ai_real z) {
+	float tmp;
+	tmp = model.scene_max.x - model.scene_min.x + x;
+	tmp = aisgl_max(model.scene_max.y - model.scene_min.y + y, tmp);
+	tmp = aisgl_max(model.scene_max.z - model.scene_min.z + z, tmp);
+	tmp = 1.f / tmp;
+	glScalef(tmp, tmp, tmp);
+
+	/* center the model */
+	glTranslatef(-model.scene_center.x, -model.scene_center.y, -model.scene_center.z);
+
+	// if the display list has not been made yet, create a new one and fill it with scene contents 
+	if (model.scene_list == 0) {
+		model.scene_list = glGenLists(1);
+		glNewList(model.scene_list, GL_COMPILE);
+		// now begin at the root node of the imported data and traverse the scenegraph by multiplying subsequent local transforms together on GL's matrix stack. 
+		recursive_render(model.scene, model.scene->mRootNode);
+		glEndList();
+	}
+	glCallList(model.scene_list);
+}
 
 // This function is the display handler of this program and called when the window needs redrawing.
 
@@ -364,36 +432,11 @@ static void Display(void)
 
 		//glutWireCone(2.0, 2.0, 20, 20); // Zeichnet einen Drahtkörper im Zentrum des AR-Markers
 
-		float tmp;
-		//float angle = 0;
-
-		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		//glLoadIdentity();
-		//gluLookAt(0.f, 0.f, 3.f, 0.f, 0.f, -5.f, 0.f, 1.f, 0.f);
-
-		/* rotate it around the y axis */
-		//glRotatef(angle, 0.f, 1.f, 0.f);
 
 		/* scale the whole asset to fit into our view frustum */
-		tmp = scene_max.x - scene_min.x;
-		tmp = aisgl_max(scene_max.y - scene_min.y, tmp);
-		tmp = aisgl_max(scene_max.z - scene_min.z, tmp);
-		tmp = 1.f / tmp;
-		glScalef(tmp, tmp, tmp);
 
-		/* center the model */
-		glTranslatef(-scene_center.x, -scene_center.y, -scene_center.z);
-
-		// if the display list has not been made yet, create a new one and fill it with scene contents 
-		if (scene_list == 0) {
-			scene_list = glGenLists(1);
-			glNewList(scene_list, GL_COMPILE);
-			// now begin at the root node of the imported data and traverse the scenegraph by multiplying subsequent local transforms together on GL's matrix stack. 
-			recursive_render(scene, scene->mRootNode);
-			glEndList();
-		}
-		glCallList(scene_list);
+		load_model(knife,0,0,0);
+		load_model(fish,0.5,0.5,0);
 	} 
 		
 
@@ -406,8 +449,7 @@ static void Display(void)
 
 int main(int argc, char** argv)
 {
-	//********** Cam and ar_tracker inits **************
-	char* model_file = "../models/knife.stl";
+	//char* model_file = "../models/knife.stl";
 
 	//********** Cam and ar_tracker inits **************
 	
@@ -471,12 +513,8 @@ int main(int argc, char** argv)
 	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
 
 
-	// Load the model file.
-	if (0 != loadasset(model_file)) {
-		printf_s("Failed to load model. Please ensure that the specified file exists.");
-		aiDetachAllLogStreams();
-		return EXIT_FAILURE;
-	}
+
+	// Transparend background after clear
 	glClearColor(0, 0, 0, 1);
 
 
@@ -490,7 +528,8 @@ int main(int argc, char** argv)
 	//				 --------<-------	
 
 	// free space to avoid ressource leakage (assimp)
-	aiReleaseImport(scene);
+	aiReleaseImport(knife.scene);
+	aiReleaseImport(fish.scene);
 
 	return (0);
 }
