@@ -79,9 +79,10 @@ MODEL::MODEL(char* path_model)
 	// Load the model file.
 	scene = aiImportFile(path_model, aiProcessPreset_TargetRealtime_MaxQuality);
 
-	if (0 != loadasset(&scene_min, &scene_max, scene, &scene_center)) {
+	if (0 != loadasset(&this->scene_min, &this->scene_max, this->scene, &this->scene_center)) {
 		printf_s("Failed to load model. Please ensure that the specified file exists.");
 	}
+	
 }
 
 MODEL::~MODEL()
@@ -106,8 +107,8 @@ MODEL::~MODEL()
 // ============================================================================
 
 // the global Assimp scene 
-MODEL knife("../models/knife.stl");
-MODEL fish("../models/fish.obj");
+MODEL knife("../Models/knife.stl");
+MODEL fish("../Models/fish.obj");
 
 // Setup the size of the openGL Window
 static int prefWidth = 800;					// Fullscreen mode width.
@@ -436,6 +437,7 @@ static void Display(void)
 		/* scale the whole asset to fit into our view frustum */
 
 		load_model(knife,0,0,0);
+
 		load_model(fish,0.5,0.5,0);
 	} 
 		
