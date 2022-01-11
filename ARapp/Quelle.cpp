@@ -366,6 +366,7 @@ int main(int argc, char** argv)
 	C_STRUCT aiLogStream stream;
 
 	
+	/*
 	if (argc < 2) {
 		print_error("No input model file specified.");
 		print_run_command(COMMAND_USAGE);
@@ -378,9 +379,9 @@ int main(int argc, char** argv)
 			return EXIT_SUCCESS;
 		}
 	}
-	
+	*/
 	// Check and validate the specified model file extension.
-	model_file = argv[1];
+	model_file = "models/knife.stl";
 	const char* extension = strrchr(model_file, '.');
 	if (!extension) {
 		print_error("Please provide a file with a valid extension.");

@@ -23,7 +23,8 @@
 #endif // _MSC_VER
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "contrib/stb/stb_image.h"
+//#include "contrib/stb/stb_image.h"
+#include <stb_image.h>
 
 #ifdef _MSC_VER
 #pragma warning(default: 4100) // Enable warning 'unreferenced formal parameter'
