@@ -370,7 +370,7 @@ static void Display(void)
 		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//glLoadIdentity();
-		gluLookAt(0.f, 0.f, 3.f, 0.f, 0.f, -5.f, 0.f, 1.f, 0.f);
+		//gluLookAt(0.f, 0.f, 3.f, 0.f, 0.f, -5.f, 0.f, 1.f, 0.f);
 
 		/* rotate it around the y axis */
 		//glRotatef(angle, 0.f, 1.f, 0.f);
@@ -407,7 +407,7 @@ static void Display(void)
 int main(int argc, char** argv)
 {
 	//********** Cam and ar_tracker inits **************
-	char* model_file = "models/knife.stl";
+	char* model_file = "../models/knife.stl";
 
 	//********** Cam and ar_tracker inits **************
 	

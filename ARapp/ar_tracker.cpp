@@ -54,11 +54,11 @@ void init_cam(void)
 
 {
 	//path to the camera parameter data
-	const char *cparam_name = "Data/camera_para.dat";    
+	const char *cparam_name = "../Data/camera_para.dat";    
 	
 	// Camera configuration.
 	#ifdef _WIN32
-		char			*vconf = "Data\\WDM_camera_flipV.xml";  // video capture library configuration string
+		char			*vconf = "../Data\\WDM_camera_flipV.xml";  // video capture library configuration string
 	#else
 		char			*vconf = "";
 	#endif
@@ -140,7 +140,7 @@ void init_marker(void)
 	//arSetPatternDetectionMode(arHandle, AR_MATRIX_CODE_DETECTION);
 	//arSetMatrixCodeType(arHandle, AR_MATRIX_CODE_3x3_PARITY65);
 	// Define the ar-marker and path
-	const char *patt_name = "Data/patt.hiro";		
+	const char *patt_name = "../Data/patt.hiro";		
 
 	// Call function setup marker
 	if  (!setupMarker(patt_name, &gPatt_id))		
