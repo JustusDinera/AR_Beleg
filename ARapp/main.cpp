@@ -109,6 +109,8 @@ MODEL::~MODEL()
 // the global Assimp scene 
 MODEL knife("../Models/knife.stl");
 MODEL fish("../Models/fish.obj");
+MODEL pot("../Models/pot.stl");
+MODEL lid("../Models/lid.stl");
 
 // Setup the size of the openGL Window
 static int prefWidth = 800;					// Fullscreen mode width.
@@ -291,6 +293,10 @@ void recursive_render(const C_STRUCT aiScene* sc, const C_STRUCT aiNode* nd)
 		//const C_STRUCT aiMesh* mesh = scene->mMeshes[nd->mMeshes[n]];
 		const C_STRUCT aiMesh* mesh = sc->mMeshes[nd->mMeshes[n]];
 
+		//color
+		//aiColor3D color(1.0f, 0.0f, 0.0f);
+
+
 		apply_material(sc->mMaterials[mesh->mMaterialIndex]);
 		/*
 		if (mesh->mNormals == NULL) {
@@ -389,6 +395,9 @@ void load_model(MODEL model, ai_real x, ai_real y, ai_real z) {
 	/* center the model */
 	glTranslatef(-model.scene_center.x, -model.scene_center.y, -model.scene_center.z);
 
+	//color
+	//aiColor3D color(1.0f, 0.0f, 0.0f);
+
 	// if the display list has not been made yet, create a new one and fill it with scene contents 
 	if (model.scene_list == 0) {
 		model.scene_list = glGenLists(1);
@@ -438,7 +447,10 @@ static void Display(void)
 
 		load_model(knife,0,0,0);
 
-		load_model(fish,0.5,0.5,0);
+		//load_model(fish,0.5,0.5,0);
+		//load_model(pot, 0.5, 0.5, 0);
+		//load_model(lid, 0.5, 0.5, 0);
+
 	} 
 		
 
