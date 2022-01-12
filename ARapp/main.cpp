@@ -386,14 +386,14 @@ static void Reshape(int w, int h)
 //void load_model(const aiScene* scene, aiVector3D* scene_max, aiVector3D* scene_min, aiVector3D* scene_center, GLuint scene_list) {
 void load_model(MODEL model, ai_real x, ai_real y, ai_real z) {
 	float tmp;
-	tmp = model.scene_max.x - model.scene_min.x + x;
-	tmp = aisgl_max(model.scene_max.y - model.scene_min.y + y, tmp);
-	tmp = aisgl_max(model.scene_max.z - model.scene_min.z + z, tmp);
+	tmp = model.scene_max.x - model.scene_min.x ;
+	tmp = aisgl_max(model.scene_max.y - model.scene_min.y, tmp);
+	tmp = aisgl_max(model.scene_max.z - model.scene_min.z, tmp);
 	tmp = 1.f / tmp;
 	glScalef(tmp, tmp, tmp);
 
 	/* center the model */
-	glTranslatef(-model.scene_center.x, -model.scene_center.y, -model.scene_center.z);
+	glTranslatef(-model.scene_center.x + x, -model.scene_center.y + y, -model.scene_center.z + z);
 
 	//color
 	//aiColor3D color(1.0f, 0.0f, 0.0f);
@@ -445,7 +445,16 @@ static void Display(void)
 
 		/* scale the whole asset to fit into our view frustum */
 
-		load_model(knife,0,0,0);
+		load_model(knife,0.2,0.2,0);
+		glTranslatef(0.2, 0.2, 0);
+		glColor3f(0, 1, 0);
+		recursive_render(knife.scene, knife.scene->mRootNode);
+		glColor3f(1, 1, 0);
+		recursive_render(pot.scene, pot.scene->mRootNode);
+		glColor3f(1, 0, 1);
+		glTranslatef(0.5, 0.5, 0.4);
+		recursive_render(lid.scene, lid.scene->mRootNode);
+
 
 		//load_model(fish,0.5,0.5,0);
 		//load_model(pot, 0.5, 0.5, 0);
@@ -463,8 +472,13 @@ static void Display(void)
 
 int main(int argc, char** argv)
 {
-	//char* model_file = "../models/knife.stl";
+	MODEL knife("../Models/knife.stl");
+	MODEL fish("../Models/fish.obj");
+	MODEL pot("../Models/pot.stl");
+	MODEL lid("../Models/lid.stl");
 
+
+	
 	//********** Cam and ar_tracker inits **************
 	
 	init_cam();   // Initialisation of the cam
@@ -544,6 +558,7 @@ int main(int argc, char** argv)
 	// free space to avoid ressource leakage (assimp)
 	aiReleaseImport(knife.scene);
 	aiReleaseImport(fish.scene);
+	aiReleaseImport(pot.scene);
 
 	return (0);
 }
