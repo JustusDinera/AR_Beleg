@@ -107,10 +107,11 @@ MODEL::~MODEL()
 // ============================================================================
 
 // the global Assimp scene 
-MODEL knife("../Models/knife.stl");
+MODEL knife("../Models/knife.obj");
 MODEL fish("../Models/fish.obj");
-MODEL pot("../Models/pot.stl");
-MODEL lid("../Models/lid.stl");
+MODEL pot("../Models/pot.obj");
+MODEL lid("../Models/lid.obj");
+MODEL carrot("../Models/carrot.stl");
 
 // Setup the size of the openGL Window
 static int prefWidth = 800;					// Fullscreen mode width.
@@ -293,10 +294,6 @@ void recursive_render(const C_STRUCT aiScene* sc, const C_STRUCT aiNode* nd)
 		//const C_STRUCT aiMesh* mesh = scene->mMeshes[nd->mMeshes[n]];
 		const C_STRUCT aiMesh* mesh = sc->mMeshes[nd->mMeshes[n]];
 
-		//color
-		//aiColor3D color(1.0f, 0.0f, 0.0f);
-
-
 		apply_material(sc->mMaterials[mesh->mMaterialIndex]);
 		/*
 		if (mesh->mNormals == NULL) {
@@ -321,8 +318,9 @@ void recursive_render(const C_STRUCT aiScene* sc, const C_STRUCT aiNode* nd)
 			glBegin(face_mode);
 				for (i = 0; i < face->mNumIndices; i++) {
 					int index = face->mIndices[i];
-					if (mesh->mColors[0] != NULL)
-						glColor4fv((GLfloat*)&mesh->mColors[0][index]);
+					//Auskommentiert; Farbe mit glcolor3f(); vor aufruf dieser Funktion setzen
+					//if (mesh->mColors[0] != NULL)
+						//glColor4fv((GLfloat*)&mesh->mColors[0][index]);
 					if (mesh->mNormals != NULL)
 						glNormal3fv(&mesh->mNormals[index].x);
 					glVertex3fv(&mesh->mVertices[index].x);
@@ -383,22 +381,22 @@ static void Reshape(int w, int h)
 	// Call through to anyone else who needs to know about window sizing here.
 }
 
-//void load_model(const aiScene* scene, aiVector3D* scene_max, aiVector3D* scene_min, aiVector3D* scene_center, GLuint scene_list) {
-void load_model(MODEL model, ai_real x, ai_real y, ai_real z) {
+
+void scale_center_model(MODEL model, ai_real x, ai_real y, ai_real z) {
 	float tmp;
-	tmp = model.scene_max.x - model.scene_min.x ;
+	tmp = model.scene_max.x - model.scene_min.x;
 	tmp = aisgl_max(model.scene_max.y - model.scene_min.y, tmp);
 	tmp = aisgl_max(model.scene_max.z - model.scene_min.z, tmp);
-	tmp = 1.f / tmp;
+	tmp = 1.5f / tmp;
 	glScalef(tmp, tmp, tmp);
 
 	/* center the model */
-	glTranslatef(-model.scene_center.x + x, -model.scene_center.y + y, -model.scene_center.z + z);
+	//glTranslatef(-model.scene_center.x + x, -model.scene_center.y + y, -model.scene_center.z + z);
 
-	//color
-	//aiColor3D color(1.0f, 0.0f, 0.0f);
+}
 
-	// if the display list has not been made yet, create a new one and fill it with scene contents 
+
+void create_new_list(MODEL model) {
 	if (model.scene_list == 0) {
 		model.scene_list = glGenLists(1);
 		glNewList(model.scene_list, GL_COMPILE);
@@ -407,6 +405,31 @@ void load_model(MODEL model, ai_real x, ai_real y, ai_real z) {
 		glEndList();
 	}
 	glCallList(model.scene_list);
+}
+
+
+//void load_model(const aiScene* scene, aiVector3D* scene_max, aiVector3D* scene_min, aiVector3D* scene_center, GLuint scene_list) {
+void load_model(MODEL model, ai_real x, ai_real y, ai_real z) {
+	float tmp;
+	tmp = model.scene_max.x - model.scene_min.x ;
+	tmp = aisgl_max(model.scene_max.y - model.scene_min.y, tmp);
+	tmp = aisgl_max(model.scene_max.z - model.scene_min.z, tmp);
+	tmp = 1.5f / tmp;
+	glScalef(tmp, tmp, tmp);
+
+	/* center the model */
+	glTranslatef(-model.scene_center.x + x, -model.scene_center.y + y, -model.scene_center.z + z);
+
+	// if the display list has not been made yet, create a new one and fill it with scene contents 
+	if (model.scene_list == 0) {
+		model.scene_list = glGenLists(1);
+
+		//glNewList(model.scene_list, GL_COMPILE);
+		// now begin at the root node of the imported data and traverse the scenegraph by multiplying subsequent local transforms together on GL's matrix stack. 
+		//recursive_render(model.scene, model.scene->mRootNode);
+		//glEndList();
+	}
+	//glCallList(model.scene_list);
 }
 
 // This function is the display handler of this program and called when the window needs redrawing.
@@ -445,13 +468,38 @@ static void Display(void)
 
 		/* scale the whole asset to fit into our view frustum */
 
-		load_model(knife,0.2,0.2,0);
-		glTranslatef(0.2, 0.2, 0);
+		load_model(fish,1.0 ,1.0, 1.0);
+
+		//glLoadIdentity;
+		glPushMatrix();					//Nullpunkt Weltkoord
+
+		glTranslatef(0.0, 0.0, 0.0);
+		glRotatef(45.0, 0.0, 0.0, 1.0);
+		glRotatef(90.0, 0.0, 1.0, 0.0);
+
+
+		glColor3f(1, 0, 0);
+		recursive_render(fish.scene, fish.scene->mRootNode);
+
+		glPopMatrix();					// Restore world coordinate system.
+
+		load_model(carrot, 1.0, 1.0, 1.0);
+		glTranslatef(0.0, 0.0, 0.0);
 		glColor3f(0, 1, 0);
-		recursive_render(knife.scene, knife.scene->mRootNode);
+		recursive_render(carrot.scene, carrot.scene->mRootNode);
+
+		//scale_center_model(pot, 1.0, 1.0, 1.0);
+		//create_new_list(knife);
+
+		/*
+		glTranslatef(0.2, 10.2, 0);
 		glColor3f(1, 1, 0);
+		//recursive_render(knife.scene, knife.scene->mRootNode);
+
+		glColor3f(1, 0, 0);	
 		recursive_render(pot.scene, pot.scene->mRootNode);
-		glColor3f(1, 0, 1);
+
+		glColor3f(0, 1, 0);
 		glTranslatef(0.5, 0.5, 0.4);
 		recursive_render(lid.scene, lid.scene->mRootNode);
 
@@ -459,6 +507,7 @@ static void Display(void)
 		//load_model(fish,0.5,0.5,0);
 		//load_model(pot, 0.5, 0.5, 0);
 		//load_model(lid, 0.5, 0.5, 0);
+		*/
 
 	} 
 		
@@ -472,10 +521,11 @@ static void Display(void)
 
 int main(int argc, char** argv)
 {
-	MODEL knife("../Models/knife.stl");
+	MODEL knife("../Models/knife.obj");
 	MODEL fish("../Models/fish.obj");
 	MODEL pot("../Models/pot.stl");
 	MODEL lid("../Models/lid.stl");
+	MODEL carrot("../Models/karotte.stl");
 
 
 	
@@ -559,6 +609,8 @@ int main(int argc, char** argv)
 	aiReleaseImport(knife.scene);
 	aiReleaseImport(fish.scene);
 	aiReleaseImport(pot.scene);
+	aiReleaseImport(lid.scene);
+	aiReleaseImport(carrot.scene);
 
 	return (0);
 }
