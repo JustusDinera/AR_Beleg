@@ -105,6 +105,7 @@ MODEL::~MODEL()
 MODEL knife("../Models/knife.stl");
 MODEL board("../Models/board.stl");
 MODEL pot("../Models/pot.stl");
+MODEL potWater("../Models/potWater.stl");
 MODEL lid("../Models/lid.stl");
 MODEL fish("../Models/fish.stl");
 MODEL fishCut("../Models/fishCut.stl");
@@ -483,61 +484,31 @@ static void Display(void)
 		board	brown	1, 0.647, 0.309
 		fish	pink	0.980, 0.501, 0.447
 		meat	pink	0.988, 0.337, 0.337
+		water	blue	0.447, 0.807, 0.952
 		*/
 
-<<<<<<< HEAD
-		//load knife
-		glLoadIdentity;
-		glPushMatrix();							//Nullpunkt Weltkoord
-			scale_model(knife, 1.0, 1.0, 1.0);		//scale model to scene
-			glTranslatef(-100.0, 0.0, 0.0);			//translate
-			//glRotatef(-90.0, 1.0, 0.0, 0.0);		//rotate 
-			glColor3f(0.929, 0.568, 0.129);			//color
-			//render Model
-			recursive_render(knife.scene, knife.scene->mRootNode);
-		glPopMatrix();							// Restore world coordinate system.
-
-		//load meat
-		glLoadIdentity;
-		glPushMatrix();							//Nullpunkt Weltkoord
-			scale_model(knife, 1.0, 1.0, 1.0);		//scale model to scene
-			//glRotatef(-90.0, 1.0, 0.0, 0.0);		//rotate 
-			glColor3f(0.929, 0.568, 0.129);			//color
-			//render Model
-
-			//DrawKnife(knife);
-			
-		glPopMatrix();							// Restore world coordinate system.
-
-=======
 		// load pot
-		load_model(pot, 1.0, 1.0, 1.0);
-
-		//glLoadIdentity;
+		glLoadIdentity;
 		glPushMatrix();					//Nullpunkt Weltkoord
-		glTranslatef(0.0, 0.0, 0.0);
-		glColor3f(1, 0, 1);
+		scale_model(pot, 1.0, 1.0, 1.0);
+		glTranslatef(100.0, 0.0, 0.0);
+		glColor3f(0.662, 0.662, 0.662);
 		recursive_render(pot.scene, pot.scene->mRootNode);	//render Model
+		glColor3f(0.447, 0.807, 0.952);
+		recursive_render(potWater.scene, potWater.scene->mRootNode);	//render Model
 		glPopMatrix();					// Restore world coordinate system.
 
-
-		// load pot
-		load_model(knife,1.0 ,1.0, 1.0);
-
-		//glLoadIdentity;
+		// load knife
+		glLoadIdentity;
 		glPushMatrix();					//Nullpunkt Weltkoord
-			glTranslatef(0.0, 0.0, 0.0);
-			glRotatef(45.0, 0.0, 0.0, 1.0);
-			glRotatef(90.0, 0.0, 1.0, 0.0);
-			glColor3f(0.831, 0.847, 0.945);
-			recursive_render(knife.scene, knife.scene->mRootNode);	//render Model
+		scale_model(knife, 1.0, 1.0, 1.0);
+		glTranslatef(-100.0, 0.0, 0.0);
+		glColor3f(0.831, 0.847, 0.945);
+		recursive_render(knife.scene, knife.scene->mRootNode);	//render Model
 		glPopMatrix();					// Restore world coordinate system.
 
-		// load carrot
-		load_model(fish, 1.0, 1.0, 1.0);
-		glColor3f(0.929, 0.568, 0.129);
-		recursive_render(fish.scene, fish.scene->mRootNode);
->>>>>>> da3679128a426886637349443df0f26797efc3d2
+
+
 	} 
 		
 
@@ -651,6 +622,8 @@ int main(int argc, char** argv)
 	aiReleaseImport(meatCut.scene);
 	aiReleaseImport(meat.scene);
 	aiReleaseImport(board.scene);
+	aiReleaseImport(potWater.scene);
+
 
 	return (0);
 }
