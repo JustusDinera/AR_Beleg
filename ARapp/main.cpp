@@ -462,53 +462,43 @@ static void Display(void)
 		glLoadMatrixd(m);
 
 		//******** insert ar_content below ************
+		
+		//COLOR FOR MODELS
+		/*
+		Model	color	R,G,B
+		pot		grey	0.662, 0.662, 0.662
+		carrot	orange	0.929, 0.568, 0.129
+		knife	silver	0.831, 0.847, 0.945
+		board	brown	1, 0.647, 0.309
+		*/
 
-		//glutWireCone(2.0, 2.0, 20, 20); // Zeichnet einen Drahtkörper im Zentrum des AR-Markers
-
-
-		/* scale the whole asset to fit into our view frustum */
-
-		load_model(fish,1.0 ,1.0, 1.0);
+		// load pot
+		load_model(pot, 1.0, 1.0, 1.0);
 
 		//glLoadIdentity;
 		glPushMatrix();					//Nullpunkt Weltkoord
-
 		glTranslatef(0.0, 0.0, 0.0);
-		glRotatef(45.0, 0.0, 0.0, 1.0);
-		glRotatef(90.0, 0.0, 1.0, 0.0);
-
-
-		glColor3f(1, 0, 0);
-		recursive_render(fish.scene, fish.scene->mRootNode);
-
+		glColor3f(0.662, 0.662, 0.662);
+		recursive_render(pot.scene, pot.scene->mRootNode);	//render Model
 		glPopMatrix();					// Restore world coordinate system.
 
-		load_model(carrot, 1.0, 1.0, 1.0);
-		glTranslatef(0.0, 0.0, 0.0);
-		glColor3f(0, 1, 0);
-		recursive_render(carrot.scene, carrot.scene->mRootNode);
 
-		//scale_center_model(pot, 1.0, 1.0, 1.0);
-		//create_new_list(knife);
+		// load pot
+		load_model(knife,1.0 ,1.0, 1.0);
 
-		/*
-		glTranslatef(0.2, 10.2, 0);
-		glColor3f(1, 1, 0);
-		//recursive_render(knife.scene, knife.scene->mRootNode);
+		//glLoadIdentity;
+		glPushMatrix();					//Nullpunkt Weltkoord
+			glTranslatef(0.0, 0.0, 0.0);
+			glRotatef(45.0, 0.0, 0.0, 1.0);
+			glRotatef(90.0, 0.0, 1.0, 0.0);
+			glColor3f(0.831, 0.847, 0.945);
+			recursive_render(knife.scene, knife.scene->mRootNode);	//render Model
+		glPopMatrix();					// Restore world coordinate system.
 
-		glColor3f(1, 0, 0);	
-		recursive_render(pot.scene, pot.scene->mRootNode);
-
-		glColor3f(0, 1, 0);
-		glTranslatef(0.5, 0.5, 0.4);
-		recursive_render(lid.scene, lid.scene->mRootNode);
-
-
-		//load_model(fish,0.5,0.5,0);
-		//load_model(pot, 0.5, 0.5, 0);
-		//load_model(lid, 0.5, 0.5, 0);
-		*/
-
+		// load carrot
+		load_model(fish, 1.0, 1.0, 1.0);
+		glColor3f(0.929, 0.568, 0.129);
+		recursive_render(fish.scene, fish.scene->mRootNode);
 	} 
 		
 
@@ -521,13 +511,6 @@ static void Display(void)
 
 int main(int argc, char** argv)
 {
-	MODEL knife("../Models/knife.obj");
-	MODEL fish("../Models/fish.obj");
-	MODEL pot("../Models/pot.stl");
-	MODEL lid("../Models/lid.stl");
-	MODEL carrot("../Models/karotte.stl");
-
-
 	
 	//********** Cam and ar_tracker inits **************
 	
