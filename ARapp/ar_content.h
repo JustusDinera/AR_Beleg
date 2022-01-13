@@ -1,7 +1,6 @@
 
 void DrawArrow(static short direction);					// Funktionierender Pfeil, ausgerichtet, mit Motion
 
-
 void ArrowMotion(float timeDelta);						// Updates the motion of the arrow
 
 void DrawTeapot(void);									// Draws the Teapot
