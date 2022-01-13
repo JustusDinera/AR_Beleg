@@ -479,7 +479,7 @@ static void Display(void)
 		//glLoadIdentity;
 		glPushMatrix();					//Nullpunkt Weltkoord
 		glTranslatef(0.0, 0.0, 0.0);
-		glColor3f(0.662, 0.662, 0.662);
+		glColor3f(1, 0, 1);
 		recursive_render(pot.scene, pot.scene->mRootNode);	//render Model
 		glPopMatrix();					// Restore world coordinate system.
 
@@ -554,11 +554,22 @@ int main(int argc, char** argv)
 
 	glEnable(GL_DEPTH_TEST);
 
-	glEnable(GL_LIGHTING);                // so the renderer considers light
-	glEnable(GL_LIGHT0);
+	GLfloat lightColorSpec[] = { 0.1,0.1,0.1,1 };
+	GLfloat lightColorAmbi[] = { 1,1,0.8,1 };
+	GLfloat lightColorDiff[] = { 1,1,1,1 };
+	glLightfv(GL_LIGHT0, GL_SPECULAR, lightColorSpec);
+	//glEnable(GL_LIGHT0);
+	glLightfv(GL_LIGHT1, GL_AMBIENT, lightColorAmbi);
 	glEnable(GL_LIGHT1);
+	glLightfv(GL_LIGHT2, GL_DIFFUSE, lightColorDiff);
+	glEnable(GL_LIGHT2);
+
+	glEnable(GL_LIGHTING);                // so the renderer considers light
+	//glEnable(GL_LIGHT3);
+	glEnable(GL_COLOR_MATERIAL);
 	//glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 	glEnable(GL_NORMALIZE);
+
 
 	// We reset ARToolKit's timer (which can be used to keep track of frame rates).
 	arUtilTimerReset();
@@ -574,7 +585,8 @@ int main(int argc, char** argv)
 	// Register the keyboard input function	
 
 
-	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
+	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+	
 
 
 
