@@ -49,11 +49,6 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-//--------- own lips -------------
-//#include <finite_state_machine.h>
-//#include <ar_content.h>
-//#include <user_interface.h>
-
 // ============================================================================
 //	Global definitions
 // ============================================================================
@@ -108,10 +103,15 @@ MODEL::~MODEL()
 
 // the global Assimp scene 
 MODEL knife("../Models/knife.stl");
-MODEL fish("../Models/fish.stl");
+MODEL board("../Models/board.stl");
 MODEL pot("../Models/pot.stl");
 MODEL lid("../Models/lid.stl");
+MODEL fish("../Models/fish.stl");
+MODEL fishCut("../Models/fishCut.stl");
 MODEL carrot("../Models/carrot.stl");
+MODEL carrotCut("../Models/carrotCut.stl");
+MODEL meat("../Models/meat.stl");
+MODEL meatCut("../Models/meatCut.stl");
 
 // Setup the size of the openGL Window
 static int prefWidth = 800;					// Fullscreen mode width.
@@ -119,7 +119,6 @@ static int prefHeight = 600;				// Fullscreen mode height.
 // Setup puffer depth and refresh rate
 static int prefDepth = 32;					// Fullscreen mode bit depth.
 static int prefRefresh = 0;					// Fullscreen mode refresh rate. Set to 0 to use default rate.
-
 
 
 
@@ -408,6 +407,15 @@ void create_new_list(MODEL model) {
 	glCallList(model.scene_list);
 }
 
+void scale_model(MODEL model, ai_real x, ai_real y, ai_real z)
+{
+	float tmp;
+	tmp = model.scene_max.x - model.scene_min.x;
+	tmp = aisgl_max(model.scene_max.y - model.scene_min.y, tmp);
+	tmp = aisgl_max(model.scene_max.z - model.scene_min.z, tmp);
+	tmp = 1.5f / tmp;
+	glScalef(tmp, tmp, tmp);
+}
 
 //void load_model(const aiScene* scene, aiVector3D* scene_max, aiVector3D* scene_min, aiVector3D* scene_center, GLuint scene_list) {
 void load_model(MODEL model, ai_real x, ai_real y, ai_real z) {
@@ -418,19 +426,21 @@ void load_model(MODEL model, ai_real x, ai_real y, ai_real z) {
 	tmp = 1.5f / tmp;
 	glScalef(tmp, tmp, tmp);
 
+	
 	/* center the model */
-	glTranslatef(-model.scene_center.x + x, -model.scene_center.y + y, -model.scene_center.z + z);
-
+	//glTranslatef(-model.scene_center.x + x, -model.scene_center.y + y, -model.scene_center.z + z);
+	/*
 	// if the display list has not been made yet, create a new one and fill it with scene contents 
 	if (model.scene_list == 0) {
 		model.scene_list = glGenLists(1);
 
-		//glNewList(model.scene_list, GL_COMPILE);
+		glNewList(model.scene_list, GL_COMPILE);
 		// now begin at the root node of the imported data and traverse the scenegraph by multiplying subsequent local transforms together on GL's matrix stack. 
-		//recursive_render(model.scene, model.scene->mRootNode);
-		//glEndList();
+		recursive_render(model.scene, model.scene->mRootNode);
+		glEndList();
 	}
-	//glCallList(model.scene_list);
+	glCallList(model.scene_list);
+	*/
 }
 
 // This function is the display handler of this program and called when the window needs redrawing.
@@ -464,42 +474,40 @@ static void Display(void)
 
 		//******** insert ar_content below ************
 		
-		//COLOR FOR MODELS
+		//COLOR VALUES FOR MODELS
 		/*
 		Model	color	R,G,B
 		pot		grey	0.662, 0.662, 0.662
 		carrot	orange	0.929, 0.568, 0.129
 		knife	silver	0.831, 0.847, 0.945
 		board	brown	1, 0.647, 0.309
+		fish	pink	0.980, 0.501, 0.447
+		meat	pink	0.988, 0.337, 0.337
 		*/
 
-		// load pot
-		load_model(pot, 1.0, 1.0, 1.0);
+		//load knife
+		glLoadIdentity;
+		glPushMatrix();							//Nullpunkt Weltkoord
+			scale_model(knife, 1.0, 1.0, 1.0);		//scale model to scene
+			glTranslatef(-100.0, 0.0, 0.0);			//translate
+			//glRotatef(-90.0, 1.0, 0.0, 0.0);		//rotate 
+			glColor3f(0.929, 0.568, 0.129);			//color
+			//render Model
+			recursive_render(knife.scene, knife.scene->mRootNode);
+		glPopMatrix();							// Restore world coordinate system.
 
-		//glLoadIdentity;
-		glPushMatrix();					//Nullpunkt Weltkoord
-		glTranslatef(0.0, 0.0, 0.0);
-		glColor3f(0.662, 0.662, 0.662);
-		recursive_render(pot.scene, pot.scene->mRootNode);	//render Model
-		glPopMatrix();					// Restore world coordinate system.
+		//load meat
+		glLoadIdentity;
+		glPushMatrix();							//Nullpunkt Weltkoord
+			scale_model(knife, 1.0, 1.0, 1.0);		//scale model to scene
+			//glRotatef(-90.0, 1.0, 0.0, 0.0);		//rotate 
+			glColor3f(0.929, 0.568, 0.129);			//color
+			//render Model
 
+			//DrawKnife(knife);
+			
+		glPopMatrix();							// Restore world coordinate system.
 
-		// load pot
-		load_model(knife,1.0 ,1.0, 1.0);
-
-		//glLoadIdentity;
-		glPushMatrix();					//Nullpunkt Weltkoord
-			glTranslatef(0.0, 0.0, 0.0);
-			glRotatef(45.0, 0.0, 0.0, 1.0);
-			glRotatef(90.0, 0.0, 1.0, 0.0);
-			glColor3f(0.831, 0.847, 0.945);
-			recursive_render(knife.scene, knife.scene->mRootNode);	//render Model
-		glPopMatrix();					// Restore world coordinate system.
-
-		// load carrot
-		load_model(fish, 1.0, 1.0, 1.0);
-		glColor3f(0.929, 0.568, 0.129);
-		recursive_render(fish.scene, fish.scene->mRootNode);
 	} 
 		
 
@@ -597,6 +605,10 @@ int main(int argc, char** argv)
 	aiReleaseImport(pot.scene);
 	aiReleaseImport(lid.scene);
 	aiReleaseImport(carrot.scene);
+	aiReleaseImport(carrotCut.scene);
+	aiReleaseImport(meatCut.scene);
+	aiReleaseImport(meat.scene);
+	aiReleaseImport(board.scene);
 
 	return (0);
 }
