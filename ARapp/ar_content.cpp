@@ -17,6 +17,8 @@ static float gDrawRotateAngle = 0;			// For use in drawing.
 static int	 gDrawRotate = FALSE;
 
 
+
+
 void DrawArrow(static short direction)		// Rotating arrow
 {
 		glLoadIdentity;
