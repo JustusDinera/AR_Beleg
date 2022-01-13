@@ -107,10 +107,10 @@ MODEL::~MODEL()
 // ============================================================================
 
 // the global Assimp scene 
-MODEL knife("../Models/knife.obj");
-MODEL fish("../Models/fish.obj");
-MODEL pot("../Models/pot.obj");
-MODEL lid("../Models/lid.obj");
+MODEL knife("../Models/knife.stl");
+MODEL fish("../Models/fish.stl");
+MODEL pot("../Models/pot.stl");
+MODEL lid("../Models/lid.stl");
 MODEL carrot("../Models/carrot.stl");
 
 // Setup the size of the openGL Window
@@ -375,6 +375,7 @@ static void Reshape(int w, int h)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, (GLsizei)w, (GLsizei)h);
 	glMatrixMode(GL_PROJECTION);
+	//glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -552,8 +553,10 @@ int main(int argc, char** argv)
 //	debugReportMode();		
 
 	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_LIGHTING);
 
+	glEnable(GL_LIGHTING);                // so the renderer considers light
+	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHT1);
 	//glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 	glEnable(GL_NORMALIZE);
 
