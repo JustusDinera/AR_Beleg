@@ -537,7 +537,7 @@ void draw(
 	glPopMatrix();					// Restore world coordinate system.
 }
 
-GLfloat upDownMovment(GLfloat min, GLfloat max, GLfloat stepSize) {
+GLfloat upDownMovement(GLfloat min, GLfloat max, GLfloat stepSize) {
 	static int state = 0; // 0 = up; 1 = down
 	static GLfloat prevValue = 0;
 	static unsigned int prevTime = 0;
@@ -553,27 +553,25 @@ GLfloat upDownMovment(GLfloat min, GLfloat max, GLfloat stepSize) {
 	if (msTime - prevTime > 20)
 	{
 		prevValue += stepSize;
+		prevTime = msTime;
 	}
 
-	if (prevValue + min > max)
+	if (max - min < prevValue)
 	{
+		if (state)
+			state = 0;
+		else
+			state = 1;
+			
 		prevValue = 0;
 	}
 
 	if (state)
 	{
-		if (max - prevValue  < min)
-		{
-			state = 0;
-		}
 		return (max - prevValue);
 	}
 	else
 	{
-		if (min + prevValue > max)
-		{
-			state = 1;
-		}
 		return (min + prevValue);
 	}
 }
@@ -588,7 +586,7 @@ void DrawBoardCarrotCutKnife(void)
 	draw(&carrotCut, 1.5, 1, 1, 0, -0.2, 0.1, 0.929, 0.568, 0.129);
 
 	//knife
-	draw(&knife, 1.2, 1.2, 1.2, -0.1, -0.5, upDownMovment(0.2,0.6,0.01), 0.831, 0.847, 0.945);
+	draw(&knife, 1.2, 1.2, 1.2, -0.1, -0.5, upDownMovement(0.2,0.6,0.01), 0.831, 0.847, 0.945);
 }
 
 void DrawBoardCarrotFish(void)
