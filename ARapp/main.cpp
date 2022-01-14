@@ -547,36 +547,78 @@ void DrawBoardFishCutKnife(void)
 
 }
 
+void draw(
+	MODEL* model,
+	GLfloat scaleX,
+	GLfloat scaleY,
+	GLfloat scaleZ,
+	GLfloat transX,
+	GLfloat transY,
+	GLfloat transZ,
+	GLfloat colorR,
+	GLfloat colorG,
+	GLfloat colorB)
+{
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	glTranslatef(transX, transY, transZ);
+	scale_center_model(*model, 1, 1, 1);
+	glScalef(scaleX, scaleY, scaleZ);
+	glColor3f(colorR, colorG, colorB);
+	recursive_render(model->scene, model->scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+}
+
+GLfloat upDownMovement(GLfloat min, GLfloat max, GLfloat stepSize) {
+	static int state = 0; // 0 = up; 1 = down
+	static GLfloat prevValue = 0;
+	static unsigned int prevTime = 0;
+	unsigned int msTime;
+
+	msTime = glutGet(GLUT_ELAPSED_TIME);
+
+	if (prevTime == 0)
+	{
+		prevTime = msTime;
+	}
+
+	if (msTime - prevTime > 20)
+	{
+		prevValue += stepSize;
+		prevTime = msTime;
+	}
+
+	if (max - min < prevValue)
+	{
+		if (state)
+			state = 0;
+		else
+			state = 1;
+			
+		prevValue = 0;
+	}
+
+	if (state)
+	{
+		return (max - prevValue);
+	}
+	else
+	{
+		return (min + prevValue);
+	}
+}
+
 void DrawBoardCarrotCutKnife(void)
 {
 	// ***board, cut carrot, knife***
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	scale_center_model(board, 1.0, 1.0, 1.0);
-	glTranslatef(0.0, 0.0, 0.0);
-	glScalef(2.0, 2.0, 2.0);
-	glColor3f(0.482, 0.192, 0.058);
-	recursive_render(board.scene, board.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
+
+	draw(&board, 2, 2, 2, 0, 0, 0, 0.482, 0.192, 0.058);
 
 	//carrot
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	scale_center_model(carrotCut, 1.0, 1.0, 1.0);
-	glScalef(1.5, 1.0, 1.0);
-	glTranslatef(0.0, -5.0, 10.0);
-	glColor3f(0.929, 0.568, 0.129);
-	recursive_render(carrotCut.scene, carrotCut.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
+	draw(&carrotCut, 1.5, 1, 1, 0, -0.2, 0.1, 0.929, 0.568, 0.129);
 
 	//knife
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	scale_center_model(knife, 1.0, 1.0, 1.0);
-	glTranslatef(-0.8, -80.0, 100.0);
-	glColor3f(0.831, 0.847, 0.945);
-	recursive_render(knife.scene, knife.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
+	draw(&knife, 1.2, 1.2, 1.2, -0.1, -0.5, upDownMovement(0.2,0.6,0.01), 0.831, 0.847, 0.945);
 }
 
 void DrawBoardLeekCutKnife(void)
@@ -618,24 +660,11 @@ void DrawBoardCarrotFish(void)
 	// ***load board, carrot, fish***
 
 	//chopping board
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	scale_center_model(board, 1.0, 1.0, 1.0);
-	glTranslatef(0.619, 0.349, 0.094);
-	glScalef(2.0, 2.0, 2.0);
-	glColor3f(0.482, 0.192, 0.058);
-	recursive_render(board.scene, board.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
+	draw(&board, 2, 2, 2, 0.619, 0.349, 0.094, 0.482, 0.192, 0.058);
+	
 
 	//carrot
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	scale_center_model(carrot, 1.0, 1.0, 1.0);
-	glScalef(1.5, 1.0, 1.0);
-	glTranslatef(0.0, -35.0, 10.0);
-	glColor3f(0.929, 0.568, 0.129);
-	recursive_render(carrot.scene, carrot.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
+	draw(&carrot, 1.5, 1.0, 1.0, 0.0, -40.0, 10.0, 0.929, 0.568, 0.129);
 
 	//leek
 	glLoadIdentity;
@@ -650,14 +679,7 @@ void DrawBoardCarrotFish(void)
 	glPopMatrix();					// Restore world coordinate system.
 
 	//fish
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	scale_center_model(fish, 1.0, 1.0, 1.0);
-	glScalef(1.5, 1.0, 1.0);
-	glTranslatef(-0.6, -0.6, -0.85);
-	glColor3f(0.349, 0.529, 0.486);
-	recursive_render(fish.scene, fish.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
+	draw(&fish, 1.5, 1.0, 1.0, -0.6, -0.7, -0.85, 0.349, 0.529, 0.486);
 
 }
 
@@ -880,10 +902,10 @@ static void Display(void)
 		//DrawBoardCarrotCutKnife();
 		//DrawBoardLeekCutKnife();
 		//DrawBoardFishCutKnife();
-		//DrawPotWaterInSink();
-		//DrawPotWaterOnStove();
-		DrawFoodInPot();
-
+		//DrawBoardCarrotCutKnife();
+		//DrawBoardCarrotFish();
+		//DrawPotWater();
+		DrawStove();
 
 
 	} 
