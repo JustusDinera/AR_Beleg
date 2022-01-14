@@ -114,6 +114,14 @@ MODEL carrotCut("../Models/carrotCut.stl");
 MODEL meat("../Models/meat.stl");
 MODEL meatCut("../Models/meatCut.stl");
 
+MODEL sink("../Models/sink.stl");
+MODEL sinkDoor("../Models/sinkDoor.stl");
+MODEL sinkFaucet("../Models/sinkFaucet.stl");
+
+MODEL stove("../Models/stove.stl");
+MODEL stoveBlack("../Models/stoveBlack.stl");
+MODEL stoveDoor("../Models/stoveDoor.stl");
+
 // Setup the size of the openGL Window
 static int prefWidth = 800;					// Fullscreen mode width.
 static int prefHeight = 600;				// Fullscreen mode height.
@@ -445,6 +453,35 @@ void load_model(MODEL model, ai_real x, ai_real y, ai_real z) {
 }
 
 
+void DrawStove(void)
+{
+	// ***stove***
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	//glTranslatef(0.0, 0.0, 0.0);
+	glScalef(0.03, 0.03, 0.03);
+	glColor3f(1.0, 1.0, 1.0);
+	recursive_render(stove.scene, stove.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	//glTranslatef(0.0, 0.0, 0.0);
+	glScalef(0.03, 0.03, 0.03);
+	glColor3f(0.0, 0.0, 0.0);
+	recursive_render(stoveBlack.scene, stoveBlack.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	//glTranslatef(0.0, 0.0, 0.0);
+	glScalef(0.03, 0.03, 0.03);
+	glColor3f(1.0, 1.0, 0.0);
+	recursive_render(stoveDoor.scene, stoveDoor.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+
+}
+
 void DrawBoardFishCutKnife(void)
 {
 	// ***board, cut fish, knife***
@@ -607,8 +644,9 @@ static void Display(void)
 		
 		//DrawBoardFishCutKnife();
 		//DrawBoardCarrotCutKnife();
-		DrawBoardCarrotFish();
+		//DrawBoardCarrotFish();
 		//DrawPotWater();
+		DrawStove();
 
 
 	} 
@@ -726,6 +764,12 @@ int main(int argc, char** argv)
 	aiReleaseImport(board.scene);
 	aiReleaseImport(potWater.scene);
 
+	aiReleaseImport(sink.scene);
+	aiReleaseImport(sinkDoor.scene);
+	aiReleaseImport(sinkFaucet.scene);
 
+	aiReleaseImport(stove.scene);
+	aiReleaseImport(stoveBlack.scene);
+	aiReleaseImport(stoveDoor.scene);
 	return (0);
 }
