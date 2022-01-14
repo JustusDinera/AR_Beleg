@@ -537,7 +537,7 @@ void draw(
 	glPopMatrix();					// Restore world coordinate system.
 }
 
-GLfloat upDownMovement(GLfloat min, GLfloat max, GLfloat stepSize) {
+GLfloat upDownMovement(GLfloat min, GLfloat max, GLfloat stepSize, int * move, GLfloat * oldValue) {
 	static int state = 0; // 0 = up; 1 = down
 	static GLfloat prevValue = 0;
 	static unsigned int prevTime = 0;
@@ -578,6 +578,8 @@ GLfloat upDownMovement(GLfloat min, GLfloat max, GLfloat stepSize) {
 
 void DrawBoardCarrotCutKnife(void)
 {
+	static int moveDirection = 0;
+	static GLfloat lastValue = 0;
 	// ***board, cut carrot, knife***
 
 	draw(&board, 2, 2, 2, 0, 0, 0, 0.482, 0.192, 0.058);
@@ -586,28 +588,28 @@ void DrawBoardCarrotCutKnife(void)
 	draw(&carrotCut, 1.5, 1, 1, 0, -0.2, 0.1, 0.929, 0.568, 0.129);
 
 	//knife
-	draw(&knife, 1.2, 1.2, 1.2, -0.1, -0.5, upDownMovement(0.2,0.6,0.01), 0.831, 0.847, 0.945);
+	draw(&knife, 1.2, 1.2, 1.2, -0.1, -0.5, upDownMovement(0.2,0.6,0.01, &moveDirection, &lastValue), 0.831, 0.847, 0.945);
 }
 
 void DrawBoardCarrotFish(void)
 {
+	static int moveDirection = 0;
+	static GLfloat lastValue = 0;
 	// ***load board, carrot, fish***
 
 	//chopping board
 	draw(&board, 2, 2, 2, 0.619, 0.349, 0.094, 0.482, 0.192, 0.058);
 	
-
 	//carrot
 	draw(&carrot, 1.5, 1.0, 1.0, 0.0, -40.0, 10.0, 0.929, 0.568, 0.129);
 
 	//fish
-	draw(&fish, 1.5, 1.0, 1.0, -0.6, -0.7, -0.85, 0.349, 0.529, 0.486);
+	draw(&fish, 1.5, 1.0, 1.0, -0.6, -0.7, upDownMovement(0.2,0.6,0.01, &moveDirection, &lastValue), 0.349, 0.529, 0.486);
 
 }
 
 void DrawPotWater(void)
 {
-
 	glLoadIdentity;
 	glPushMatrix();					//Nullpunkt Weltkoord
 	scale_center_model(pot, 1.0, 1.0, 1.0);
@@ -618,7 +620,6 @@ void DrawPotWater(void)
 	glColor3f(0.447, 0.807, 0.952);
 	recursive_render(potWater.scene, potWater.scene->mRootNode);	//render Model
 	glPopMatrix();					// Restore world coordinate system.
-
 }
 
 // This function is the display handler of this program and called when the window needs redrawing.
@@ -664,8 +665,8 @@ static void Display(void)
 		water	blue	0.447, 0.807, 0.952
 		*/
 		
-		//DrawBoardFishCutKnife();
-		DrawBoardCarrotCutKnife();
+		DrawBoardFishCutKnife();
+		//DrawBoardCarrotCutKnife();
 		//DrawBoardCarrotFish();
 		//DrawPotWater();
 		//DrawStove();
