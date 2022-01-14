@@ -525,6 +525,67 @@ void DrawStove(void)
 
 }
 
+void draw(
+	MODEL* model,
+	GLfloat scaleX,
+	GLfloat scaleY,
+	GLfloat scaleZ,
+	GLfloat transX,
+	GLfloat transY,
+	GLfloat transZ,
+	GLfloat colorR,
+	GLfloat colorG,
+	GLfloat colorB)
+{
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	glTranslatef(transX, transY, transZ);
+	scale_center_model(*model, 1, 1, 1);
+	glScalef(scaleX, scaleY, scaleZ);
+	glColor3f(colorR, colorG, colorB);
+	recursive_render(model->scene, model->scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+}
+
+GLfloat upDownMovement(GLfloat min, GLfloat max, GLfloat stepSize, int* move, GLfloat* oldValue) {
+	static int state = 0; // 0 = up; 1 = down
+	static GLfloat prevValue = 0;
+	static unsigned int prevTime = 0;
+	unsigned int msTime;
+
+	msTime = glutGet(GLUT_ELAPSED_TIME);
+
+	if (prevTime == 0)
+	{
+		prevTime = msTime;
+	}
+
+	if (msTime - prevTime > 20)
+	{
+		prevValue += stepSize;
+		prevTime = msTime;
+	}
+
+	if (max - min < prevValue)
+	{
+		if (state)
+			state = 0;
+		else
+			state = 1;
+
+		prevValue = 0;
+	}
+
+	if (state)
+	{
+		return (max - prevValue);
+	}
+	else
+	{
+		return (min + prevValue);
+	}
+}
+
 void DrawBoardFishCutKnife(void)
 {
 	// ***board, cut fish, knife***
@@ -552,59 +613,6 @@ void DrawBoardFishCutKnife(void)
 
 }
 
-void draw(
-	MODEL* model,
-	GLfloat scaleX,
-	GLfloat scaleY,
-	GLfloat scaleZ,
-	GLfloat transX,
-	GLfloat transY,
-	GLfloat transZ,
-	GLfloat colorR,
-	GLfloat colorG,
-	GLfloat colorB)
-{
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	glTranslatef(transX, transY, transZ);
-	scale_center_model(*model, 1, 1, 1);
-	glScalef(scaleX, scaleY, scaleZ);
-	glColor3f(colorR, colorG, colorB);
-	recursive_render(model->scene, model->scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
-}
-
-GLfloat upDownMovement(GLfloat min, GLfloat max, GLfloat stepSize, int * move, GLfloat * oldValue) {
-	static int state = 0; // 0 = up; 1 = down
-	static GLfloat prevValue = 0;
-	static unsigned int prevTime = 0;
-	unsigned int msTime;
-
-	msTime = glutGet(GLUT_ELAPSED_TIME);
-
-	if (prevTime == 0)
-	{
-		prevTime = msTime;
-	}
-
-	if (msTime - prevTime > 20)
-	{
-		prevValue += stepSize;
-		prevTime = msTime;
-	}
-
-	if (max - min < prevValue)
-	{
-		if (state)
-			state = 0;
-		else
-			state = 1;
-			
-		prevValue = 0;
-	}
-
-}
-
 void DrawBoardCarrotCutKnife(void)
 {
 	static int moveDirection = 0;
@@ -622,6 +630,8 @@ void DrawBoardCarrotCutKnife(void)
 
 void DrawBoardLeekCutKnife(void)
 {
+	static int moveDirection = 0;
+	static GLfloat lastValue = 0;
 	// ***board, cut carrot, knife***
 	draw(&board, 2, 2, 2, 0, 0, 0, 0.482, 0.192, 0.058);
 
@@ -638,7 +648,7 @@ void DrawBoardLeekCutKnife(void)
 	glPopMatrix();					// Restore world coordinate system.
 
 	//knife
-	draw(&knife, 1.2, 1.2, 1.2, -0.1, -0.5, upDownMovement(0.2, 0.6, 0.05), 0.831, 0.847, 0.945);
+	draw(&knife, 1.2, 1.2, 1.2, -0.1, -0.5, upDownMovement(0.2, 0.6, 0.01, &moveDirection, &lastValue), 0.831, 0.847, 0.945);
 }
 
 void DrawBoardCarrotFishLeek(void)
