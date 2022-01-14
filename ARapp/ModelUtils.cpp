@@ -1,4 +1,4 @@
-#pragma once
+//#pragma once
 
 #include "ModelUtils.h"
 
@@ -209,3 +209,5 @@ int loadasset(aiVector3D* scene_min, aiVector3D* scene_max, const C_STRUCT aiSce
 	}
 	return 1;
 }
+
+

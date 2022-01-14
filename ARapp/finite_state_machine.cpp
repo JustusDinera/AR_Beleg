@@ -5,7 +5,6 @@
 #include <GL/glut.h>
 #include <ar_content.h>
 
-//#include "Model.h"
 
 //-------------- Definitions --------------------------------
 
