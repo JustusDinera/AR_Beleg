@@ -16,29 +16,8 @@ extern int state;	// extern definition of the variable
 static float gDrawRotateAngle = 0;			// For use in drawing.
 static int	 gDrawRotate = FALSE;
 
-void neuesModell()
-{
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
 
-	glTranslatef(0.0, 0.1, 0.0);	//translate y +0.1
-	glRotatef(90.0, 0.0, 0.0, 1.0); //rotate 90 to left
-	glScalef(0.1, 0.1, 0.1);		//scale 0,1
 
-	glLineWidth(1.0);				//liniendicke
-	glColor3f(0.0, 0.0, 0.5);		//color
-
-	//***
-	//Modell
-	glBegin(GL_TRIANGLES);
-	glVertex3f(0, 0, 0);
-	glVertex3f(0, 1, 0);
-	glVertex3f(1, 1, 0);
-	glEnd();
-	//***
-
-	glPopMatrix();					// Restore world coordinate system.
-}
 
 void DrawArrow(static short direction)		// Rotating arrow
 {
