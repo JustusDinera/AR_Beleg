@@ -49,102 +49,33 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-// ============================================================================
-//	Global definitions
-// ============================================================================
-int loadasset(aiVector3D* scene_min, aiVector3D* scene_max, const C_STRUCT aiScene* scene, aiVector3D* scene_center);
-
-// the global Assimp scene object class
-
-class MODEL
-{
-public:
-	MODEL(char* path_model);
-	~MODEL();
-
-	const C_STRUCT aiScene * scene;
-	GLuint scene_list;
-	C_STRUCT aiVector3D scene_min, scene_max, scene_center;
-};
-MODEL::MODEL(char* path_model)
-{
-	//scene = NULL;
-	scene_list = 0;
-
-	// Load the model file.
-	scene = aiImportFile(path_model, aiProcessPreset_TargetRealtime_MaxQuality);
-
-	if (0 != loadasset(&this->scene_min, &this->scene_max, this->scene, &this->scene_center)) {
-		printf_s("Failed to load model. Please ensure that the specified file exists.");
-	}
-	
-}
-
-MODEL::~MODEL()
-{
-}
-
-
-
-// ============================================================================
-//	Constants
-// ============================================================================
-
-#define VIEW_SCALEFACTOR		0.025		// 1.0 ARToolKit unit becomes 0.025 of my OpenGL units.
-#define VIEW_DISTANCE_MIN		0.1			// Objects closer to the camera than this will not be displayed.
-#define VIEW_DISTANCE_MAX		100.0		// Objects further away from the camera than this will not be displayed.
-
-
-
-
-// ============================================================================
-//	Global variables
-// ============================================================================
-
-// the global Assimp scene 
-MODEL knife("../Models/knife.stl");
-MODEL board("../Models/board.stl");
-MODEL pot("../Models/pot.stl");
-MODEL potWater("../Models/potWater.stl");
-MODEL lid("../Models/lid.stl");
-MODEL fish("../Models/fish.stl");
-MODEL fishCut("../Models/fishCut.stl");
-MODEL carrot("../Models/carrot.stl");
-MODEL carrotCut("../Models/carrotCut.stl");
-MODEL meat("../Models/meat.stl");
-MODEL meatCut("../Models/meatCut.stl");
-
-// Setup the size of the openGL Window
-static int prefWidth = 800;					// Fullscreen mode width.
-static int prefHeight = 600;				// Fullscreen mode height.
-// Setup puffer depth and refresh rate
-static int prefDepth = 32;					// Fullscreen mode bit depth.
-static int prefRefresh = 0;					// Fullscreen mode refresh rate. Set to 0 to use default rate.
-
-
-
-
-ARGL_CONTEXT_SETTINGS_REF gArglSettings = NULL; // Open GL init settings
-
-//---------------- External global variables -------------------------
-extern ARUint8		*gARTImage;				// Pointer contains the video image
-extern ARParam		gARTCparam;				// Camera parameters
-extern double		gPatt_trans[3][4];		// Stores the transformation of the detected markers, Per-marker, but we are using only 1 marker. 
-extern int			gPatt_found;			// Per-marker, but we are using only 1 marker
-
-//---- external function declaration -------------------
-void ar_tracker(void);
-int setupMarker(const char *patt_name, int *patt_id);
-void init_cam(void);
-void init_marker(void);
-
-// ============================================================================
-//	Functions
-// ============================================================================
-
-
 #define aisgl_min(x,y) (x<y?x:y)
 #define aisgl_max(x,y) (y>x?y:x)
+
+
+
+
+// set the bounds of the node of the model
+void get_bounding_box_for_node(const C_STRUCT aiNode* nd, C_STRUCT aiVector3D* min, C_STRUCT aiVector3D* max, C_STRUCT aiMatrix4x4* trafo, const aiScene* scene);
+
+// set the bounds of the displayed area 
+void get_bounding_box(C_STRUCT aiVector3D* min, C_STRUCT aiVector3D* max, const aiScene* C_STRUCT scene);
+
+// convert a color array to a float array
+void color4_to_float4(const C_STRUCT aiColor4D* c, float f[4]);
+
+// converte single value to a array of an color
+void set_float4(float f[4], float a, float b, float c, float d);
+
+// set the surface of the models
+void apply_material(const C_STRUCT aiMaterial* mtl);
+
+// Render the imported models
+void recursive_render(const C_STRUCT aiScene* sc, const C_STRUCT aiNode* nd);
+
+// load the model to the scene
+int loadasset(aiVector3D* scene_min, aiVector3D* scene_max, const C_STRUCT aiScene* scene, aiVector3D* scene_center);
+
 
 // set the bounds of the node of the model
 void get_bounding_box_for_node(const C_STRUCT aiNode* nd,
@@ -316,15 +247,15 @@ void recursive_render(const C_STRUCT aiScene* sc, const C_STRUCT aiNode* nd)
 			}
 
 			glBegin(face_mode);
-				for (i = 0; i < face->mNumIndices; i++) {
-					int index = face->mIndices[i];
-					//Auskommentiert; Farbe mit glcolor3f(); vor aufruf dieser Funktion setzen
-					//if (mesh->mColors[0] != NULL)
-						//glColor4fv((GLfloat*)&mesh->mColors[0][index]);
-					if (mesh->mNormals != NULL)
-						glNormal3fv(&mesh->mNormals[index].x);
-					glVertex3fv(&mesh->mVertices[index].x);
-				}
+			for (i = 0; i < face->mNumIndices; i++) {
+				int index = face->mIndices[i];
+				//Auskommentiert; Farbe mit glcolor3f(); vor aufruf dieser Funktion setzen
+				//if (mesh->mColors[0] != NULL)
+					//glColor4fv((GLfloat*)&mesh->mColors[0][index]);
+				if (mesh->mNormals != NULL)
+					glNormal3fv(&mesh->mNormals[index].x);
+				glVertex3fv(&mesh->mVertices[index].x);
+			}
 			glEnd();
 		}
 
@@ -353,6 +284,111 @@ int loadasset(aiVector3D* scene_min, aiVector3D* scene_max, const C_STRUCT aiSce
 	}
 	return 1;
 }
+
+
+class MODEL
+{
+public:
+	MODEL(char* path_model);
+	~MODEL();
+
+	const C_STRUCT aiScene* scene;
+	GLuint scene_list;
+	C_STRUCT aiVector3D scene_min, scene_max, scene_center;
+};
+MODEL::MODEL(char* path_model)
+{
+	//scene = NULL;
+	scene_list = 0;
+
+	// Load the model file.
+	scene = aiImportFile(path_model, aiProcessPreset_TargetRealtime_MaxQuality);
+
+	if (0 != loadasset(&this->scene_min, &this->scene_max, this->scene, &this->scene_center)) {
+		printf_s("Failed to load model. Please ensure that the specified file exists.");
+	}
+}
+
+MODEL::~MODEL()
+{
+	// free space to avoid ressource leakage (assimp)
+	aiReleaseImport(this->scene);
+}
+
+// ============================================================================
+//	Global definitions
+// ============================================================================
+//int loadasset(aiVector3D* scene_min, aiVector3D* scene_max, const C_STRUCT aiScene* scene, aiVector3D* scene_center);
+
+// the global Assimp scene object class
+
+
+MODEL knife("../Models/knife.stl");
+MODEL board("../Models/board.stl");
+MODEL pot("../Models/pot.stl");
+MODEL potWater("../Models/potWater.stl");
+MODEL lid("../Models/lid.stl");
+MODEL fish("../Models/fish.stl");
+MODEL fishCut("../Models/fishCut.stl");
+MODEL carrot("../Models/carrot.stl");
+MODEL carrotCut("../Models/carrotCut.stl");
+MODEL meat("../Models/meat.stl");
+MODEL meatCut("../Models/meatCut.stl");
+
+
+
+
+// ============================================================================
+//	Constants
+// ============================================================================
+
+#define VIEW_SCALEFACTOR		0.025		// 1.0 ARToolKit unit becomes 0.025 of my OpenGL units.
+#define VIEW_DISTANCE_MIN		0.1			// Objects closer to the camera than this will not be displayed.
+#define VIEW_DISTANCE_MAX		100.0		// Objects further away from the camera than this will not be displayed.
+
+
+
+
+// ============================================================================
+//	Global variables
+// ============================================================================
+
+
+MODEL sink("../Models/sink.stl");
+MODEL sinkDoor("../Models/sinkDoor.stl");
+MODEL sinkFaucet("../Models/sinkFaucet.stl");
+
+MODEL stove("../Models/stove.stl");
+MODEL stoveBlack("../Models/stoveBlack.stl");
+MODEL stoveDoor("../Models/stoveDoor.stl");
+
+// Setup the size of the openGL Window
+static int prefWidth = 800;					// Fullscreen mode width.
+static int prefHeight = 600;				// Fullscreen mode height.
+// Setup puffer depth and refresh rate
+static int prefDepth = 32;					// Fullscreen mode bit depth.
+static int prefRefresh = 0;					// Fullscreen mode refresh rate. Set to 0 to use default rate.
+
+
+
+ARGL_CONTEXT_SETTINGS_REF gArglSettings = NULL; // Open GL init settings
+
+//---------------- External global variables -------------------------
+extern ARUint8		*gARTImage;				// Pointer contains the video image
+extern ARParam		gARTCparam;				// Camera parameters
+extern double		gPatt_trans[3][4];		// Stores the transformation of the detected markers, Per-marker, but we are using only 1 marker. 
+extern int			gPatt_found;			// Per-marker, but we are using only 1 marker
+
+//---- external function declaration -------------------
+void ar_tracker(void);
+int setupMarker(const char *patt_name, int *patt_id);
+void init_cam(void);
+void init_marker(void);
+
+// ============================================================================
+//	Functions
+// ============================================================================
+
 
 
 //	This function is called on events when the visibility of the
@@ -392,7 +428,7 @@ void scale_center_model(MODEL model, ai_real x, ai_real y, ai_real z) {
 	glScalef(tmp, tmp, tmp);
 
 	/* center the model */
-	//glTranslatef(-model.scene_center.x + x, -model.scene_center.y + y, -model.scene_center.z + z);
+	glTranslatef(-model.scene_center.x + x, -model.scene_center.y + y, -model.scene_center.z + z);
 
 }
 
@@ -444,6 +480,153 @@ void load_model(MODEL model, ai_real x, ai_real y, ai_real z) {
 	*/
 }
 
+
+void DrawStove(void)
+{
+	// ***stove***
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	//glTranslatef(0.0, 0.0, 0.0);
+	glScalef(0.03, 0.03, 0.03);
+	glColor3f(1.0, 1.0, 1.0);
+	recursive_render(stove.scene, stove.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	//glTranslatef(0.0, 0.0, 0.0);
+	glScalef(0.03, 0.03, 0.03);
+	glColor3f(0.0, 0.0, 0.0);
+	recursive_render(stoveBlack.scene, stoveBlack.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	//glTranslatef(0.0, 0.0, 0.0);
+	glScalef(0.03, 0.03, 0.03);
+	glColor3f(1.0, 1.0, 0.0);
+	recursive_render(stoveDoor.scene, stoveDoor.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+
+}
+
+void DrawBoardFishCutKnife(void)
+{
+	// ***board, cut fish, knife***
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	scale_center_model(board, 1.0, 1.0, 1.0);
+	glTranslatef(0.0, 0.0, 0.0);
+	glScalef(2.0, 2.0, 2.0);
+	glColor3f(0.482, 0.192, 0.058);
+	recursive_render(board.scene, board.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+
+	//fish
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	scale_center_model(fishCut, 1.0, 1.0, 1.0);
+	glScalef(1.0, 1.0, 1.0);
+	glTranslatef(-1.0, -1.25, -0.85);
+	glColor3f(0.929, 0.568, 0.129);
+	recursive_render(fishCut.scene, fishCut.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+
+	//knife
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	scale_center_model(knife, 1.0, 1.0, 1.0);
+	glTranslatef(-0.8, -80.0, 100.0);
+	glColor3f(0.349, 0.529, 0.486);
+	recursive_render(knife.scene, knife.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+
+}
+
+void DrawBoardCarrotCutKnife(void)
+{
+	// ***board, cut carrot, knife***
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	scale_center_model(board, 1.0, 1.0, 1.0);
+	glTranslatef(0.0, 0.0, 0.0);
+	glScalef(2.0, 2.0, 2.0);
+	glColor3f(0.482, 0.192, 0.058);
+	recursive_render(board.scene, board.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+
+	//carrot
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	scale_center_model(carrotCut, 1.0, 1.0, 1.0);
+	glScalef(1.5, 1.0, 1.0);
+	glTranslatef(0.0, -5.0, 10.0);
+	glColor3f(0.929, 0.568, 0.129);
+	recursive_render(carrotCut.scene, carrotCut.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+
+	//knife
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	scale_center_model(knife, 1.0, 1.0, 1.0);
+	glTranslatef(-0.8, -80.0, 100.0);
+	glColor3f(0.831, 0.847, 0.945);
+	recursive_render(knife.scene, knife.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+}
+
+void DrawBoardCarrotFish(void)
+{
+	// ***load board, carrot, fish***
+
+	//chopping board
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	scale_center_model(board, 1.0, 1.0, 1.0);
+	glTranslatef(0.619, 0.349, 0.094);
+	glScalef(2.0, 2.0, 2.0);
+	glColor3f(0.482, 0.192, 0.058);
+	recursive_render(board.scene, board.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+
+	//carrot
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	scale_center_model(carrot, 1.0, 1.0, 1.0);
+	glScalef(1.5, 1.0, 1.0);
+	glTranslatef(0.0, -40.0, 10.0);
+	glColor3f(0.929, 0.568, 0.129);
+	recursive_render(carrot.scene, carrot.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+
+	//fish
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	scale_center_model(fish, 1.0, 1.0, 1.0);
+	glScalef(1.5, 1.0, 1.0);
+	glTranslatef(-0.6, -0.7, -0.85);
+	glColor3f(0.349, 0.529, 0.486);
+	recursive_render(fish.scene, fish.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+
+}
+
+void DrawPotWater(void)
+{
+
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	scale_center_model(pot, 1.0, 1.0, 1.0);
+	glTranslatef(0, 0.0, 0.0);
+	glColor3f(0.662, 0.662, 0.662);
+	recursive_render(pot.scene, pot.scene->mRootNode);	//render Model
+
+	glColor3f(0.447, 0.807, 0.952);
+	recursive_render(potWater.scene, potWater.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+
+}
+
 // This function is the display handler of this program and called when the window needs redrawing.
 
 static void Display(void)
@@ -481,31 +664,19 @@ static void Display(void)
 		pot		grey	0.662, 0.662, 0.662
 		carrot	orange	0.929, 0.568, 0.129
 		knife	silver	0.831, 0.847, 0.945
-		board	brown	1, 0.647, 0.309
-		fish	pink	0.980, 0.501, 0.447
+		board	brown	0.482, 0.192, 0.058
+		fish	pink	0.349, 0.529, 0.486
 		meat	pink	0.988, 0.337, 0.337
 		water	blue	0.447, 0.807, 0.952
 		*/
+		
+		DrawBoardFishCutKnife();
+		//DrawBoardCarrotCutKnife();
+		//DrawBoardCarrotFish();
+		//DrawPotWater();
+		//DrawStove();
 
-		// load pot
-		glLoadIdentity;
-		glPushMatrix();					//Nullpunkt Weltkoord
-		scale_model(pot, 1.0, 1.0, 1.0);
-		glTranslatef(100.0, 0.0, 0.0);
-		glColor3f(0.662, 0.662, 0.662);
-		recursive_render(pot.scene, pot.scene->mRootNode);	//render Model
-		glColor3f(0.447, 0.807, 0.952);
-		recursive_render(potWater.scene, potWater.scene->mRootNode);	//render Model
-		glPopMatrix();					// Restore world coordinate system.
 
-		// load knife
-		glLoadIdentity;
-		glPushMatrix();					//Nullpunkt Weltkoord
-		scale_model(knife, 1.0, 1.0, 1.0);
-		glTranslatef(-100.0, 0.0, 0.0);
-		glColor3f(0.831, 0.847, 0.945);
-		recursive_render(knife.scene, knife.scene->mRootNode);	//render Model
-		glPopMatrix();					// Restore world coordinate system.
 
 
 
@@ -563,18 +734,16 @@ int main(int argc, char** argv)
 
 	glEnable(GL_DEPTH_TEST);
 
-	GLfloat lightColorSpec[] = { 0.1,0.1,0.1,1 };
 	GLfloat lightColorAmbi[] = { 1,1,0.8,1 };
 	GLfloat lightColorDiff[] = { 1,1,1,1 };
-	glLightfv(GL_LIGHT0, GL_SPECULAR, lightColorSpec);
-	//glEnable(GL_LIGHT0);
+
 	glLightfv(GL_LIGHT1, GL_AMBIENT, lightColorAmbi);
 	glEnable(GL_LIGHT1);
 	glLightfv(GL_LIGHT2, GL_DIFFUSE, lightColorDiff);
 	glEnable(GL_LIGHT2);
 
 	glEnable(GL_LIGHTING);                // so the renderer considers light
-	//glEnable(GL_LIGHT3);
+
 	glEnable(GL_COLOR_MATERIAL);
 	//glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 	glEnable(GL_NORMALIZE);
@@ -611,18 +780,6 @@ int main(int argc, char** argv)
 	//               |	main 		|	
 	//				 |	loop		|
 	//				 --------<-------	
-
-	// free space to avoid ressource leakage (assimp)
-	aiReleaseImport(knife.scene);
-	aiReleaseImport(fish.scene);
-	aiReleaseImport(pot.scene);
-	aiReleaseImport(lid.scene);
-	aiReleaseImport(carrot.scene);
-	aiReleaseImport(carrotCut.scene);
-	aiReleaseImport(meatCut.scene);
-	aiReleaseImport(meat.scene);
-	aiReleaseImport(board.scene);
-	aiReleaseImport(potWater.scene);
 
 
 	return (0);
