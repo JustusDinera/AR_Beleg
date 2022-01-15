@@ -30,10 +30,10 @@
     <ClInclude Include="..\ARToolkit\include\AR\video.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="model_loader.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClInclude>
     <ClInclude Include="model_loader.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelTest.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

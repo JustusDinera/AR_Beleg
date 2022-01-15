@@ -20,6 +20,7 @@ int state;						// current step of the finite state machine variable used in ext
 //--------------- Functions
 
 
+
 void fsm()	// Finite state machine
 {
 	
@@ -29,7 +30,8 @@ void fsm()	// Finite state machine
 		{
 			
 			//output ar content
-			DrawTeapot();					//Draw teapot in this ste
+			//DrawTeapot();					//Draw teapot in this ste
+			DrawPotWaterOnStove();
 			
 			
 			//output text
