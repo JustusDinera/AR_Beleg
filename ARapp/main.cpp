@@ -1,4 +1,4 @@
-/* This File includes the Main function and the setup calls für arToolKit and OpenGL
+/* This File includes the Main function and the setup calls fÃ¼r arToolKit and OpenGL
 *  main.c
 *
 */
@@ -28,13 +28,12 @@
 //	Includes
 // ============================================================================
 //---- standard lips -------------
-
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>							// malloc(), free()
 #include <math.h>
 #include "ar_tracker.h"
-#include "ar_content.h"
+//#include "ar_content.h"
 #include "finite_state_machine.h"
 #include "user_interface.h"
 
@@ -49,6 +48,9 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+
+//#include "ModelTest.h"
+
 // deinition of coordinates
 enum coord { X, Y, Z };
 
@@ -61,6 +63,8 @@ enum coord { X, Y, Z };
 
 int loadasset(aiVector3D* scene_min, aiVector3D* scene_max, const C_STRUCT aiScene* scene, aiVector3D* scene_center);
 
+
+/*
 // the global Assimp scene object class
 
 class MODEL
@@ -73,6 +77,7 @@ public:
 	GLuint scene_list;
 	C_STRUCT aiVector3D scene_min, scene_max, scene_center;
 };
+
 MODEL::MODEL(char* path_model)
 {
 	//scene = NULL;
@@ -89,7 +94,7 @@ MODEL::~MODEL()
 {
 	aiReleaseImport(this->scene);
 }
-
+*/
 
 
 // ============================================================================
@@ -107,6 +112,7 @@ MODEL::~MODEL()
 //	Global variables
 // ============================================================================
 
+/*
 // the global Assimp scene 
 MODEL knife("../Models/knife.stl");
 MODEL board("../Models/board.stl");
@@ -134,7 +140,7 @@ MODEL bowlLower("../Models/bowlLower.stl");
 MODEL bowlUpper("../Models/bowlUpper.stl");
 MODEL bowlInner("../Models/bowlInner.stl");
 MODEL spoon("../Models/spoon.stl");
-
+*/
 
 
 
@@ -211,6 +217,8 @@ void get_bounding_box(C_STRUCT aiVector3D* min, C_STRUCT aiVector3D* max, const 
 	get_bounding_box_for_node(scene->mRootNode, min, max, &trafo, scene);
 }
 
+*/
+/*
 // convert a color array to a float array
 void color4_to_float4(const C_STRUCT aiColor4D* c, float f[4])
 {
@@ -228,7 +236,8 @@ void set_float4(float f[4], float a, float b, float c, float d)
 	f[2] = c;
 	f[3] = d;
 }
-
+*/
+/*
 // set the surface of the models
 void apply_material(const C_STRUCT aiMaterial* mtl)
 {
@@ -294,73 +303,14 @@ void apply_material(const C_STRUCT aiMaterial* mtl)
 	else
 		glEnable(GL_CULL_FACE);
 }
+*/
 
-// Render the imported models
-void recursive_render(const C_STRUCT aiScene* sc, const C_STRUCT aiNode* nd)
-{
-	unsigned int i;
-	unsigned int n = 0, t;
-	C_STRUCT aiMatrix4x4 m = nd->mTransformation;
-
-	/* update transform */
-	aiTransposeMatrix4(&m);
-	glPushMatrix();
-	glMultMatrixf((float*)&m);
-
-	/* draw all meshes assigned to this node */
-	for (; n < nd->mNumMeshes; ++n) {
-		//const C_STRUCT aiMesh* mesh = scene->mMeshes[nd->mMeshes[n]];
-		const C_STRUCT aiMesh* mesh = sc->mMeshes[nd->mMeshes[n]];
-
-		apply_material(sc->mMaterials[mesh->mMaterialIndex]);
-		/*
-		if (mesh->mNormals == NULL) {
-			glDisable(GL_LIGHTING);
-		}
-		else {
-			glEnable(GL_LIGHTING);
-		}
-		*/
-
-		for (t = 0; t < mesh->mNumFaces; ++t) {
-			const C_STRUCT aiFace* face = &mesh->mFaces[t];
-			GLenum face_mode;
-
-			switch (face->mNumIndices) {
-			case 1: face_mode = GL_POINTS; break;
-			case 2: face_mode = GL_LINES; break;
-			case 3: face_mode = GL_TRIANGLES; break;
-			default: face_mode = GL_POLYGON; break;
-			}
-
-			glBegin(face_mode);
-				for (i = 0; i < face->mNumIndices; i++) {
-					int index = face->mIndices[i];
-					//Auskommentiert; Farbe mit glcolor3f(); vor aufruf dieser Funktion setzen
-					//if (mesh->mColors[0] != NULL)
-						//glColor4fv((GLfloat*)&mesh->mColors[0][index]);
-					if (mesh->mNormals != NULL)
-						glNormal3fv(&mesh->mNormals[index].x);
-					glVertex3fv(&mesh->mVertices[index].x);
-				}
-			glEnd();
-		}
-
-	}
-
-	/* draw all children */
-	for (n = 0; n < nd->mNumChildren; ++n) {
-		recursive_render(sc, nd->mChildren[n]);
-	}
-
-	glPopMatrix();
-}
-
+/*
 // load the model to the scene
 int loadasset(aiVector3D* scene_min, aiVector3D* scene_max, const C_STRUCT aiScene* scene, aiVector3D* scene_center)
 {
-	/* we are taking one of the postprocessing presets to avoid
-	   spelling out 20+ single postprocessing flags here. */
+	 //we are taking one of the postprocessing presets to avoid
+	   //spelling out 20+ single postprocessing flags here. 
 
 	if (scene) {
 		get_bounding_box(scene_min, scene_max, scene);
@@ -371,7 +321,7 @@ int loadasset(aiVector3D* scene_min, aiVector3D* scene_max, const C_STRUCT aiSce
 	}
 	return 1;
 }
-
+*/
 
 //	This function is called on events when the visibility of the
 //	GLUT window changes (including when it first becomes visible).
@@ -400,7 +350,7 @@ static void Reshape(int w, int h)
 	// Call through to anyone else who needs to know about window sizing here.
 }
 
-
+/*
 void scale_center_model(MODEL model, ai_real x, ai_real y, ai_real z) {
 	float tmp;
 	tmp = model.scene_max.x - model.scene_min.x;
@@ -409,12 +359,12 @@ void scale_center_model(MODEL model, ai_real x, ai_real y, ai_real z) {
 	tmp = 1.5f / tmp;
 	glScalef(tmp, tmp, tmp);
 
-	/* center the model */
+	// center the model 
 	glTranslatef(-model.scene_center.x + x, -model.scene_center.y + y, -model.scene_center.z + z);
 
 }
-
-
+*/
+/*
 void create_new_list(MODEL model) {
 	if (model.scene_list == 0) {
 		model.scene_list = glGenLists(1);
@@ -435,7 +385,7 @@ void scale_model(MODEL model, ai_real x, ai_real y, ai_real z)
 	tmp = 1.5f / tmp;
 	glScalef(tmp, tmp, tmp);
 }
-
+/*
 //void load_model(const aiScene* scene, aiVector3D* scene_max, aiVector3D* scene_min, aiVector3D* scene_center, GLuint scene_list) {
 void load_model(MODEL model, ai_real x, ai_real y, ai_real z) {
 	float tmp;
@@ -459,69 +409,9 @@ void load_model(MODEL model, ai_real x, ai_real y, ai_real z) {
 		glEndList();
 	}
 	glCallList(model.scene_list);
-	*/
-}
-
-
-
-void DrawSink(void)
-{
-	// ***Sink***
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
-	glScalef(0.03, 0.03, 0.03);
-	glColor3f(1.0, 1.0, 1.0);
-	recursive_render(sink.scene, sink.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
-
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
-	glScalef(0.03, 0.03, 0.03);
-	glColor3f(1.0, 0.0, 0.0);
-	recursive_render(sinkDoor.scene, sinkDoor.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
-
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
-	glScalef(0.03, 0.03, 0.03);
-	glColor3f(1.0, 1.0, 0.0);
-	recursive_render(sinkFaucet.scene, sinkFaucet.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
-
-}
-
-void DrawStove(void)
-{
-	// ***stove***
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
-	glScalef(0.03, 0.03, 0.03);
-	glColor3f(1.0, 1.0, 1.0);
-	recursive_render(stove.scene, stove.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
-
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
-	glScalef(0.03, 0.03, 0.03);
-	glColor3f(0.0, 0.0, 0.0);
-	recursive_render(stoveBlack.scene, stoveBlack.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
-
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
-	glScalef(0.03, 0.03, 0.03);
-	glColor3f(1.0, 1.0, 0.0);
-	recursive_render(stoveDoor.scene, stoveDoor.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
-
-}
-
+	
+}*/
+/*
 void draw(
 	MODEL* model,
 	GLfloat scaleX,
@@ -588,6 +478,65 @@ GLfloat transMovment(GLfloat min, GLfloat max, GLfloat stepSize, int* move, GLfl
 	{
 		return (min + *oldValue);
 	}
+}
+
+/*
+void DrawSink(void)
+{
+	// ***Sink***
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	//glTranslatef(0.0, 0.0, 0.0);
+	glScalef(0.03, 0.03, 0.03);
+	glColor3f(1.0, 1.0, 1.0);
+	recursive_render(sink.scene, sink.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+	
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	//glTranslatef(0.0, 0.0, 0.0);
+	glScalef(0.03, 0.03, 0.03);
+	glColor3f(1.0, 0.0, 0.0);
+	recursive_render(sinkDoor.scene, sinkDoor.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	//glTranslatef(0.0, 0.0, 0.0);
+	glScalef(0.03, 0.03, 0.03);
+	glColor3f(1.0, 1.0, 0.0);
+	recursive_render(sinkFaucet.scene, sinkFaucet.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+
+}
+
+void DrawStove(void)
+{
+	// ***stove***
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	//glTranslatef(0.0, 0.0, 0.0);
+	glScalef(0.03, 0.03, 0.03);
+	glColor3f(1.0, 1.0, 1.0);
+	recursive_render(stove.scene, stove.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	//glTranslatef(0.0, 0.0, 0.0);
+	glScalef(0.03, 0.03, 0.03);
+	glColor3f(0.0, 0.0, 0.0);
+	recursive_render(stoveBlack.scene, stoveBlack.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	//glTranslatef(0.0, 0.0, 0.0);
+	glScalef(0.03, 0.03, 0.03);
+	glColor3f(1.0, 1.0, 0.0);
+	recursive_render(stoveDoor.scene, stoveDoor.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+
 }
 
 void DrawBoardFishCutKnife(void)
@@ -977,6 +926,7 @@ void DrawServeFood(void)
 	recursive_render(spoon.scene, spoon.scene->mRootNode);	//render Model
 	glPopMatrix();					// Restore world coordinate system.
 }
+*/
 
 // This function is the display handler of this program and called when the window needs redrawing.
 
@@ -1030,9 +980,13 @@ static void Display(void)
 		//DrawBoardFishCutKnife();
 		//DrawPotWaterInSink();
 		//DrawPotWaterOnStove();
-		//DrawFoodInPot();
 		//DrawSoupDone();
 		//DrawServeFood();
+
+		fsm();
+
+
+ 
 
 		//DrawBoardCarrotCutKnife();
 		//DrawBoardCarrotFish();
@@ -1127,7 +1081,8 @@ int main(int argc, char** argv)
 
 
 	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
-	
+	glutKeyboardFunc(Keyboard);
+	glutMouseFunc(onMouseButton);
 
 
 
@@ -1144,37 +1099,10 @@ int main(int argc, char** argv)
 	//				 |	loop		|
 	//				 --------<-------	
 
-	// free space to avoid ressource leakage (assimp)
-	/*
-	aiReleaseImport(knife.scene);
-	aiReleaseImport(fish.scene);
-	aiReleaseImport(pot.scene);
-	aiReleaseImport(lid.scene);
-	aiReleaseImport(carrot.scene);
-	aiReleaseImport(carrotCut.scene);
-	aiReleaseImport(meatCut.scene);
-	aiReleaseImport(meat.scene);
-	aiReleaseImport(board.scene);
-	aiReleaseImport(potWater.scene);
-	aiReleaseImport(leekGreen.scene);
-	aiReleaseImport(leekWhite.scene);
-	aiReleaseImport(leekGreenCut.scene);
-	aiReleaseImport(leekWhiteCut.scene);
 
-	aiReleaseImport(sink.scene);
-	aiReleaseImport(sinkDoor.scene);
-	aiReleaseImport(sinkFaucet.scene);
+	//releaseModels();
 
-	aiReleaseImport(stove.scene);
-	aiReleaseImport(stoveBlack.scene);
-	aiReleaseImport(stoveDoor.scene);
-
-	aiReleaseImport(table.scene);
-	aiReleaseImport(bowlLower.scene);
-	aiReleaseImport(bowlUpper.scene);
-	aiReleaseImport(bowlInner.scene);
-	aiReleaseImport(spoon.scene);
-	*/
+	
 
 
 	return (0);

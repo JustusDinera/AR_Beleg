@@ -1,6 +1,65 @@
 //----------------- includes
 
 #include <GL/glut.h>
+#include "ModelTest.h"
+
+//** all libs***
+
+#include <windows.h>
+#include <stdio.h>
+#include <stdlib.h>							// malloc(), free()
+#include <math.h>
+#include "ar_tracker.h"
+#include "ar_content.h"
+#include "finite_state_machine.h"
+#include "user_interface.h"
+
+// ----- GL lips ------------------
+#include <GL/freeglut.h>
+
+//------- ARToolkit lips ----------
+#include <AR/gsub_lite.h>
+
+//------- assimp lips ----------
+#include <assimp/cimport.h>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
+
+//** delete libs***
+
+
+// the global Assimp scene 
+MODEL knife("../Models/knife.stl");
+MODEL board("../Models/board.stl");
+MODEL pot("../Models/pot.stl");
+MODEL potWater("../Models/potWater.stl");
+MODEL lid("../Models/lid.stl");
+MODEL fish("../Models/fish.stl");
+MODEL fishCut("../Models/fishCut.stl");
+MODEL carrot("../Models/carrot.stl");
+MODEL carrotCut("../Models/carrotCut.stl");
+MODEL meat("../Models/meat.stl");
+MODEL meatCut("../Models/meatCut.stl");
+MODEL leekGreen("../Models/leekGreen.stl");
+MODEL leekWhite("../Models/leekWhite.stl");
+MODEL leekGreenCut("../Models/leekGreenCut.stl");
+MODEL leekWhiteCut("../Models/leekWhiteCut.stl");
+
+MODEL sink("../Models/sink.stl");
+MODEL sinkDoor("../Models/sinkDoor.stl");
+MODEL sinkFaucet("../Models/sinkFaucet.stl");
+
+MODEL stove("../Models/stove.stl");
+MODEL stoveBlack("../Models/stoveBlack.stl");
+MODEL stoveDoor("../Models/stoveDoor.stl");
+
+MODEL table("../Models/table.obj");
+MODEL bowlLower("../Models/bowlLower.stl");
+MODEL bowlUpper("../Models/bowlUpper.stl");
+MODEL bowlInner("../Models/bowlInner.stl");
+MODEL spoon("../Models/spoon.stl");
+
 
 //----------- Global variables
 
@@ -15,6 +74,19 @@ extern int state;	// extern definition of the variable
 
 static float gDrawRotateAngle = 0;			// For use in drawing.
 static int	 gDrawRotate = FALSE;
+
+void DrawPotWaterOnStove()
+{
+	// Draw stove
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	//glTranslatef(0.0, 0.0, 0.0);
+	glScalef(0.03, 0.03, 0.03);
+	glColor3f(1.0, 1.0, 1.0);
+	recursive_render(stove.scene, stove.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+
+}
 
 void neuesModell()
 {
@@ -231,5 +303,7 @@ void drawText(const char *text, int length, int x, int y) // funtion to draw tex
 	glMatrixMode(GL_PROJECTION);
 	glLoadMatrixd(matrix);
 	glMatrixMode(GL_MODELVIEW);
+
+
 
 }
