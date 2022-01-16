@@ -49,6 +49,9 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+// deinition of coordinates
+enum coord { X, Y, Z };
+
 // ============================================================================
 //	Global definitions
 // ============================================================================
@@ -548,10 +551,11 @@ void draw(
 }
 
 GLfloat transMovment(GLfloat min, GLfloat max, GLfloat stepSize, int* move, GLfloat* oldValue) {
-	static int state = 0; // 0 = up; 1 = down
-	static GLfloat prevValue = 0;
+	//static int state = 0; // 0 = up; 1 = down
+	//static GLfloat prevValue = 0;
 	static unsigned int prevTime = 0;
 	unsigned int msTime;
+	GLfloat absoluteValue = max - min;
 
 	msTime = glutGet(GLUT_ELAPSED_TIME);
 
@@ -562,27 +566,33 @@ GLfloat transMovment(GLfloat min, GLfloat max, GLfloat stepSize, int* move, GLfl
 
 	if (msTime - prevTime > 20)
 	{
-		prevValue += stepSize;
+		*oldValue += stepSize;
 		prevTime = msTime;
+
+	}
+	
+	if (absoluteValue < 0)
+	{
+		absoluteValue = absoluteValue * -1;
 	}
 
-	if (max - min < prevValue)
+	if (absoluteValue < *oldValue)
 	{
-		if (state)
-			state = 0;
+		if (*move)
+			*move = 0;
 		else
-			state = 1;
+			*move = 1;
 
-		prevValue = 0;
+		*oldValue = 0;
 	}
 
-	if (state)
+	if (*move)
 	{
-		return (max - prevValue);
+		return (max - *oldValue);
 	}
 	else
 	{
-		return (min + prevValue);
+		return (min + *oldValue);
 	}
 }
 
@@ -859,167 +869,22 @@ void DrawSoupDone(void)
 
 }
 
-void copyVec(GLfloat * value, GLfloat * target) {
-	target[0] = value[0];
-	target[1] = value[1];
-	target[2] = value[2];
-}
 
-void intoPot(
-	GLfloat * start, 
-	GLfloat * turningPoint, 
-	GLfloat * end, 
-	GLfloat * angle, 
-	GLfloat * retPos, 
-	GLfloat * retAng, 
-	GLfloat stepSize, 
-	int * phase
-) {
-	enum coord {X, Y, Z};
-
-	static int reset = 0;
-	static int stepCounter = 0;
-	GLfloat distance;
-	GLfloat retVal[3] = { 0,0,0 };
-
-	// calculate step count  and size
-	int stepsFirst = (turningPoint[X] - start[X]) / stepSize;
-	int stepsSecond = end[Z] - turningPoint[Z] / stepSize;
-	GLfloat stepSizeY;
-	GLfloat stepSizeZ;
-
-	// dismiss negative steps
-	if (stepsFirst < 0)
-		stepsFirst = stepsFirst * -1;
-	if (stepsSecond< 0)
-		stepsSecond = stepsSecond * -1;
-
-	// initial setup
-	if (!retPos[X] && !retPos[Y] && !retPos[Z])
-	{
-		copyVec(start, retPos);
-	}
-
-
-	// process phases
-	if (*phase == 0)
-	{
-		stepSizeY = (turningPoint[Y] - start[Y]) / stepsFirst;
-		stepSizeZ = (turningPoint[Z] - start[Z]) / stepsFirst;
-	
-		retVal[X] = start[X] + stepSize * stepCounter;
-		retVal[Y] = start[Y] + stepSizeY * stepCounter;
-		retVal[Z] = start[Z] + stepSizeZ * stepCounter;
-
-		// return vaules
-		copyVec(retVal,retPos);
-
-		stepCounter++;
-		// reset step counter; switch to next phase
-		if (stepsFirst < stepCounter)
-		{
-			stepCounter = 0;
-			(*phase)++;
-		}
-	}
-	else if (*phase == 1)
-	{
-		
-		// return vaules
-		copyVec(retVal, retPos);
-
-		stepCounter++;
-		// reset step counter; switch to next phase
-		if (*angle < stepCounter)
-		{
-			stepCounter = 0;
-			(*phase)++;
-		}
-	} 
-	else if (*phase == 2)
-	{
-		stepSizeY = (end[Z] - turningPoint[Y]) / stepsSecond;
-		stepSizeZ = (end[Z] - turningPoint[Z]) / stepsSecond;
-
-		retVal[X] = turningPoint[X] + stepSize * stepCounter;
-		retVal[Y] = turningPoint[Y] + stepSizeY * stepCounter;
-		retVal[Z] = turningPoint[Z] + stepSizeZ * stepCounter;
-		// return vaules
-		copyVec(retVal, retPos);
-
-		stepCounter++;
-		// reset step counter; switch to first phase
-		if (stepsSecond < stepCounter)
-		{
-			stepCounter = 0;
-			*phase = 0;
-		}
-	}
-}
 
 void DrawFoodInStove(void)
 {
-	// animationsponts
+
 	// leek position
-	GLfloat leekStart[] = { 0.3, 0.3, 4 };
-	GLfloat leekturning[] = { 0,0,4 };
-	GLfloat leekEnd[] = { 0,0,3 };
-	GLfloat leekAngle[] = { 0,0,0 };
-	GLfloat static leekPrevPos[] = { 0,0,0 };
-	GLfloat static leekPrevAngle[] = { 0,0,0 };
-	int		static leekPhase = 0;
+	GLfloat start[] = { 0.6, 0.05, 4 };
+	GLfloat endZ = 1.5;
+	GLfloat angle[] = { 90,0,90 };
+	GLfloat static oldValue = 0;
+	int direction = 1;
+	int static turning = 1;
+	GLfloat static rotated[3] = { 0,0,0 };
+	GLfloat stepWidth = 0.05;
 
-	// fish positions
-	GLfloat fishStart[] = { 0,0,0 };
-	GLfloat fishturning[] = { 0,0,0 };
-	GLfloat fishEnd[] = { 0,0,0 };
-	GLfloat fishAngle[] = { 0,0,0 };
-	GLfloat static fishPrevPos[] = { 0,0,0 };
-	GLfloat static fishPrevAngle[] = { 0,0,0 };
-	int		static fishPhase = 0;
-
-	// meat position
-	GLfloat meatStart[] = { 0,0,0 };
-	GLfloat meatturning[] = { 0,0,0 };
-	GLfloat meatEnd[] = { 0,0,0 };
-	GLfloat meatAngle[] = { 0,0,0 };
-	GLfloat static meatPrevPos[] = { 0,0,0 };
-	GLfloat static meatPrevAngle[] = { 0,0,0 };
-	int		static meatPhase = 0;
-
-	// carrot position
-	GLfloat carrotStart[] = { 0,0,0 };
-	GLfloat carrotturning[] = { 0,0,0 };
-	GLfloat carrotEnd[] = { 0,0,0 };
-	GLfloat carrotAngle[] = { 0,0,0 };
-	GLfloat static carrotPrevPos[] = { 0,0,0 };
-	GLfloat static carrotPrevAngle[] = { 0,0,0 };
-	int		static carrotPhase = 0;
-
-	// Draw stove
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
-	glScalef(0.03, 0.03, 0.03);
-	glColor3f(1.0, 1.0, 1.0);
-	recursive_render(stove.scene, stove.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
-
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
-	glScalef(0.03, 0.03, 0.03);
-	glColor3f(0.0, 0.0, 0.0);
-	recursive_render(stoveBlack.scene, stoveBlack.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
-
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
-	glScalef(0.03, 0.03, 0.03);
-	glColor3f(1.0, 1.0, 0.0);
-	recursive_render(stoveDoor.scene, stoveDoor.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
+	DrawStove();
 
 	//Draw pot with water on stove
 	glLoadIdentity;
@@ -1034,21 +899,61 @@ void DrawFoodInStove(void)
 	recursive_render(potWater.scene, potWater.scene->mRootNode);	//render Model
 	glPopMatrix();  					// Restore world coordinate system.
 
-	intoPot(leekStart, leekturning, leekEnd, leekAngle, leekPrevPos, leekPrevAngle, 0.01, &leekPhase);
-	glTranslatef(leekPrevPos[0], leekPrevPos[1], leekPrevPos[2]); // translate over the stove
+
+	if (turning)
+	{
+		glTranslatef(start[X], start[Y], start[Z]); // translate over the stove
+
+		if (rotated[X] < angle[X])
+		{
+			rotated[X]++;
+		}
+		if (rotated[Y] < angle[Y])
+		{
+			rotated[Y]++;
+		}
+		if (rotated[Z] < angle[Z])
+		{
+			rotated[Z]++;
+		}
+		glRotatef(rotated[X], 1, 0, 0);
+		glRotatef(rotated[Y], 0, 1, 0);
+		glRotatef(rotated[Z], 0, 0, 1);
+
+		if (rotated[X] >= angle[X] && rotated[Y] >= angle[Y] && rotated[Z] >= angle[Z])
+		{
+			turning = 0;
+			rotated[X] = 0;
+			rotated[Y] = 0;
+			rotated[Z] = 0;
+		}
+	}
+	else
+	{
+		glTranslatef(start[X], start[Y], transMovment(endZ, start[Z], stepWidth, &direction, &oldValue)); // translate over the stove
+		glRotatef(angle[X], 1, 0, 0);
+		glRotatef(angle[Y], 1, 1, 0);
+		glRotatef(angle[Z], 0, 0, 1);
+
+		if (oldValue >= start[Z]-endZ-stepWidth)
+		{
+			turning = 1;
+		}
+	}
+	
 	//glPushMatrix();
 	//Draw Leek
-	draw(&leekGreenCut, 0.2, 0.2, 0.2, 0.2, 0.4, 0, 0, 0.564, 0.352);
-	draw(&leekWhiteCut, 0.3, 0.3, 0.3, 1.5, 0.3, 0, 0.901, 0.917, 0.905);
+	draw(&leekGreenCut, 0.2, 0.2, 0.2, 0.2, 0.3, 0.1, 0, 0.564, 0.352);
+	draw(&leekWhiteCut, 0.3, 0.3, 0.3, 1.5, 0.2, 0.1, 0.901, 0.917, 0.905);
 
 	//Draw carrot
-	draw(&carrotCut, 0.3, 0.3, 0.3, 0.3, 0.3, 0.5, 0.929, 0.568, 0.129);
+	draw(&carrotCut, 0.3, 0.3, 0.3, 0.3, 0.3, 0.4, 0.929, 0.568, 0.129);
 
 	// Draw meat
-	draw(&meatCut, 0.6, 0.6, 0.6, 0.3, 0.3, 0, 0.988, 0.337, 0.337);
+	draw(&meatCut, 0.6, 0.6, 0.6, 0.3, 0.15, 0.3, 0.988, 0.337, 0.337);
 
 	// Draw fish
-	draw(&fishCut, 0.8, 0.8, 0.8, -0.5, -1, -1, 0.349, 0.529, 0.486);
+	draw(&fishCut, 0.8, 0.8, 0.8, -0.5, -1, -0.8, 0.349, 0.529, 0.486);
 	//glPopMatrix();
 }
 
