@@ -50,6 +50,9 @@ GLfloat xmove_2, ymove_2, zmove_2 = 0;		//Pfeilmotion Translatef-Parameter für s
 
 GLfloat crossmotion = 0;						//Drehparameter des Kreuzes
 
+// deinition of coordinates
+enum coord { X, Y, Z };
+
 //-------- the global Assimp scene -----------
 MODEL knife("../Models/knife.stl");
 MODEL board("../Models/board.stl");
@@ -463,6 +466,52 @@ GLfloat upDownMovement(GLfloat min, GLfloat max, GLfloat stepSize, int* move, GL
 	}
 }
 
+GLfloat transMovment(GLfloat min, GLfloat max, GLfloat stepSize, int* move, GLfloat* oldValue) {
+	//static int state = 0; // 0 = up; 1 = down
+	//static GLfloat prevValue = 0;
+	static unsigned int prevTime = 0;
+	unsigned int msTime;
+	GLfloat absoluteValue = max - min;
+
+	msTime = glutGet(GLUT_ELAPSED_TIME);
+
+	if (prevTime == 0)
+	{
+		prevTime = msTime;
+	}
+
+	if (msTime - prevTime > 20)
+	{
+		*oldValue += stepSize;
+		prevTime = msTime;
+
+	}
+
+	if (absoluteValue < 0)
+	{
+		absoluteValue = absoluteValue * -1;
+	}
+
+	if (absoluteValue < *oldValue)
+	{
+		if (*move)
+			*move = 0;
+		else
+			*move = 1;
+
+		*oldValue = 0;
+	}
+
+	if (*move)
+	{
+		return (max - *oldValue);
+	}
+	else
+	{
+		return (min + *oldValue);
+	}
+}
+
 //****** models and scenes ******//
 
 void DrawSink(void)
@@ -652,7 +701,7 @@ void DrawPotWaterOnStove(void)
 	glPushMatrix();					//Nullpunkt Weltkoord
 	scale_center_model(pot, 1.0, 1.0, 1.0);
 	glTranslatef(45, -10.0, 372.0);
-	glScalef(0.5, 0.5, 0.5);
+	glScalef(0.65, 0.65, 0.65);
 	glColor3f(0.662, 0.662, 0.662);
 	recursive_render(pot.scene, pot.scene->mRootNode);	//render Model
 
@@ -775,7 +824,7 @@ void DrawSoupDone(void)
 	glPushMatrix();					//Nullpunkt Weltkoord
 	scale_center_model(pot, 1.0, 1.0, 1.0);
 	glTranslatef(45, -10.0, 372.0);
-	glScalef(0.5, 0.5, 0.5);
+	glScalef(0.65, 0.65, 0.65);
 	glColor3f(0.662, 0.662, 0.662);
 	recursive_render(pot.scene, pot.scene->mRootNode);	//render Model
 
@@ -785,45 +834,89 @@ void DrawSoupDone(void)
 
 }
 
-void DrawFoodInStove(void)
+void DrawFoodInPot(void)
 {
-	// Draw stove
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
-	glScalef(0.03, 0.03, 0.03);
-	glColor3f(1.0, 1.0, 1.0);
-	recursive_render(stove.scene, stove.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
+	// leek position
+	GLfloat start[] = { 0.6, 0.05, 4 };
+	GLfloat endZ = 1.5;
+	GLfloat angle[] = { 90,0,90 };
+	GLfloat static oldValue = 0;
+	int direction = 1;
+	int static turning = 1;
+	GLfloat static rotated[3] = { 0,0,0 };
+	GLfloat stepWidth = 0.05;
 
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
-	glScalef(0.03, 0.03, 0.03);
-	glColor3f(0.0, 0.0, 0.0);
-	recursive_render(stoveBlack.scene, stoveBlack.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
-
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
-	glScalef(0.03, 0.03, 0.03);
-	glColor3f(1.0, 1.0, 0.0);
-	recursive_render(stoveDoor.scene, stoveDoor.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
+	DrawStove();
 
 	//Draw pot with water on stove
 	glLoadIdentity;
 	glPushMatrix();					//Nullpunkt Weltkoord
 	scale_center_model(pot, 1.0, 1.0, 1.0);
 	glTranslatef(45, -10.0, 372.0);
-	glScalef(0.5, 0.5, 0.5);
+	glScalef(0.65, 0.65, 0.65);
 	glColor3f(0.662, 0.662, 0.662);
 	recursive_render(pot.scene, pot.scene->mRootNode);	//render Model
 
 	glColor3f(0.447, 0.807, 0.952);
 	recursive_render(potWater.scene, potWater.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
+	glPopMatrix();  					// Restore world coordinate system.
+
+
+	if (turning)
+	{
+		glTranslatef(start[X], start[Y], start[Z]); // translate over the stove
+
+		if (rotated[X] < angle[X])
+		{
+			rotated[X]++;
+		}
+		if (rotated[Y] < angle[Y])
+		{
+			rotated[Y]++;
+		}
+		if (rotated[Z] < angle[Z])
+		{
+			rotated[Z]++;
+		}
+		glRotatef(rotated[X], 1, 0, 0);
+		glRotatef(rotated[Y], 0, 1, 0);
+		glRotatef(rotated[Z], 0, 0, 1);
+
+		if (rotated[X] >= angle[X] && rotated[Y] >= angle[Y] && rotated[Z] >= angle[Z])
+		{
+			turning = 0;
+			rotated[X] = 0;
+			rotated[Y] = 0;
+			rotated[Z] = 0;
+		}
+	}
+	else
+	{
+		glTranslatef(start[X], start[Y], transMovment(endZ, start[Z], stepWidth, &direction, &oldValue)); // translate over the stove
+		glRotatef(angle[X], 1, 0, 0);
+		glRotatef(angle[Y], 1, 1, 0);
+		glRotatef(angle[Z], 0, 0, 1);
+
+		if (oldValue >= start[Z] - endZ - stepWidth)
+		{
+			turning = 1;
+		}
+	}
+
+	//glPushMatrix();
+	//Draw Leek
+	draw(&leekGreenCut, 0.2, 0.2, 0.2, 0.2, 0.3, 0.1, 0, 0.564, 0.352);
+	draw(&leekWhiteCut, 0.3, 0.3, 0.3, 1.5, 0.2, 0.1, 0.901, 0.917, 0.905);
+
+	//Draw carrot
+	draw(&carrotCut, 0.3, 0.3, 0.3, 0.3, 0.3, 0.4, 0.929, 0.568, 0.129);
+
+	// Draw meat
+	draw(&meatCut, 0.6, 0.6, 0.6, 0.3, 0.15, 0.3, 0.988, 0.337, 0.337);
+
+	// Draw fish
+	draw(&fishCut, 0.8, 0.8, 0.8, -0.5, -1, -0.8, 0.349, 0.529, 0.486);
+	//glPopMatrix();
 }
 
 void DrawServeFood(void)

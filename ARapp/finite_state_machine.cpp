@@ -113,7 +113,7 @@ void fsm()	// Finite state machine
 	if (state == 7)						//Initialschritt
 	{
 		//output ar content
-		DrawSoupDone();
+		DrawFoodInPot();
 
 		//output text
 		std::string text;		// definition textstring
@@ -126,7 +126,7 @@ void fsm()	// Finite state machine
 	if (state == 8)						//Initialschritt
 	{
 		//output ar content
-		DrawServeFood();
+		DrawSoupDone();
 
 		//output text
 		std::string text;		// definition textstring
@@ -139,20 +139,7 @@ void fsm()	// Finite state machine
 	if (state == 9)						//Initialschritt
 	{
 		//output ar content
-		DrawPotWaterOnStove();
-
-		//output text
-		std::string text;		// definition textstring
-		text = "";			// text content
-		glColor3f(1, 0, 0);		// text color e.g. (1,0,0 red)
-		drawText(text.data(), text.size(), 10, 10); //textstring, textlength (from xstring), position x,y (origin lower left 0,0)
-	}
-
-	//*********************** state 10 *****************************
-	if (state == 10)						//Initialschritt
-	{
-		//output ar content
-		//DrawPotWaterOnStove();
+		DrawServeFood();
 
 		//output text
 		std::string text;		// definition textstring
