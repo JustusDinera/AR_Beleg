@@ -55,6 +55,10 @@ enum coord { X, Y, Z };
 // ============================================================================
 //	Global definitions
 // ============================================================================
+
+#define aisgl_min(x,y) (x<y?x:y)
+#define aisgl_max(x,y) (y>x?y:x)
+
 int loadasset(aiVector3D* scene_min, aiVector3D* scene_max, const C_STRUCT aiScene* scene, aiVector3D* scene_center);
 
 // the global Assimp scene object class
@@ -80,11 +84,10 @@ MODEL::MODEL(char* path_model)
 	if (0 != loadasset(&this->scene_min, &this->scene_max, this->scene, &this->scene_center)) {
 		printf_s("Failed to load model. Please ensure that the specified file exists. %s\n",path_model);
 	}
-	
 }
-
 MODEL::~MODEL()
 {
+	aiReleaseImport(this->scene);
 }
 
 
@@ -120,15 +123,12 @@ MODEL leekGreen("../Models/leekGreen.stl");
 MODEL leekWhite("../Models/leekWhite.stl");
 MODEL leekGreenCut("../Models/leekGreenCut.stl");
 MODEL leekWhiteCut("../Models/leekWhiteCut.stl");
-
 MODEL sink("../Models/sink.stl");
 MODEL sinkDoor("../Models/sinkDoor.stl");
 MODEL sinkFaucet("../Models/sinkFaucet.stl");
-
 MODEL stove("../Models/stove.stl");
 MODEL stoveBlack("../Models/stoveBlack.stl");
 MODEL stoveDoor("../Models/stoveDoor.stl");
-
 MODEL table("../Models/table.obj");
 MODEL bowlLower("../Models/bowlLower.stl");
 MODEL bowlUpper("../Models/bowlUpper.stl");
@@ -139,14 +139,11 @@ MODEL spoon("../Models/spoon.stl");
 
 
 // Setup the size of the openGL Window
-static int prefWidth = 800;					// Fullscreen mode width.
-static int prefHeight = 600;				// Fullscreen mode height.
+static int prefWidth = 1280;					// Fullscreen mode width.
+static int prefHeight = 720;				// Fullscreen mode height.
 // Setup puffer depth and refresh rate
 static int prefDepth = 32;					// Fullscreen mode bit depth.
 static int prefRefresh = 0;					// Fullscreen mode refresh rate. Set to 0 to use default rate.
-
-
-
 
 ARGL_CONTEXT_SETTINGS_REF gArglSettings = NULL; // Open GL init settings
 
@@ -166,9 +163,6 @@ void init_marker(void);
 //	Functions
 // ============================================================================
 
-
-#define aisgl_min(x,y) (x<y?x:y)
-#define aisgl_max(x,y) (y>x?y:x)
 
 // set the bounds of the node of the model
 void get_bounding_box_for_node(const C_STRUCT aiNode* nd,
@@ -869,8 +863,6 @@ void DrawSoupDone(void)
 
 }
 
-
-
 void DrawFoodInStove(void)
 {
 
@@ -1153,6 +1145,7 @@ int main(int argc, char** argv)
 	//				 --------<-------	
 
 	// free space to avoid ressource leakage (assimp)
+	/*
 	aiReleaseImport(knife.scene);
 	aiReleaseImport(fish.scene);
 	aiReleaseImport(pot.scene);
@@ -1181,7 +1174,7 @@ int main(int argc, char** argv)
 	aiReleaseImport(bowlUpper.scene);
 	aiReleaseImport(bowlInner.scene);
 	aiReleaseImport(spoon.scene);
-
+	*/
 
 
 	return (0);
