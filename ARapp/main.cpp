@@ -929,8 +929,7 @@ static void Display(void)
 		//DrawBoardLeekCutKnife();
 		//DrawBoardFishCutKnife();
 		//DrawPotWaterInSink();
-		//DrawPotWaterOnStove(&stove);
-		//DrawFoodInPot();
+		//DrawPotWaterOnStove();
 		//DrawSoupDone();
 		//DrawServeFood();
 		fsm();
@@ -1024,7 +1023,8 @@ int main(int argc, char** argv)
 
 
 	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
-	
+	glutKeyboardFunc(Keyboard);
+	glutMouseFunc(onMouseButton);
 
 
 
