@@ -33,7 +33,6 @@
 #include <stdlib.h>							// malloc(), free()
 #include <math.h>
 #include "ar_tracker.h"
-//#include "ar_content.h"
 #include "finite_state_machine.h"
 #include "user_interface.h"
 
@@ -47,12 +46,6 @@
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
-
-//#include "ModelTest.h"
-
-// deinition of coordinates
-enum coord { X, Y, Z };
 
 // ============================================================================
 //	Global definitions
@@ -158,32 +151,7 @@ static void Display(void)
 		arglCameraViewRH(gPatt_trans, m, VIEW_SCALEFACTOR);
 		glLoadMatrixd(m);
 
-		//******** insert ar_content below ************
-		
-		//COLOR VALUES FOR MODELS
-		/*
-		Model	color	R,G,B
-		pot		grey	0.662, 0.662, 0.662
-		carrot	orange	0.929, 0.568, 0.129
-		knife	silver	0.831, 0.847, 0.945
-		board	brown	0.482, 0.192, 0.058
-		fish	pink	0.349, 0.529, 0.486
-		meat	pink	0.988, 0.337, 0.337
-		water	blue	0.447, 0.807, 0.952
-		leek	green	0, 0.564, 0.352
-		leek	white	0.901, 0.917, 0.905
-		*/
-
-		//DrawBoardCarrotFishLeek();
-		//DrawWashFood();
-		//DrawBoardCarrotCutKnife();
-		//DrawBoardLeekCutKnife();
-		//DrawBoardFishCutKnife();
-		//DrawPotWaterInSink();
-		//DrawPotWaterOnStove();
-		//DrawSoupDone();
-		//DrawServeFood();
-
+		//call finite state machine
 		fsm();
 
 	} 

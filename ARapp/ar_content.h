@@ -1,23 +1,6 @@
 #ifndef AR_CONTENT_H
 #define AR_CONTENT_H
 
-
-#include <GL/glut.h>
-#include <iostream>
-#include <windows.h>
-#include <stdio.h>
-#include <stdlib.h>							// malloc(), free()
-#include <math.h>
-#include "ar_tracker.h"
-//#include "finite_state_machine.h"
-#include "user_interface.h"
-
-// ----- GL lips ------------------
-#include <GL/freeglut.h>
-
-//------- ARToolkit lips ----------
-#include <AR/gsub_lite.h>
-
 //------- assimp lips ----------
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
@@ -84,7 +67,7 @@ MODEL bowlUpper("../Models/bowlUpper.stl");
 MODEL bowlInner("../Models/bowlInner.stl");
 MODEL spoon("../Models/spoon.stl");
 
-extern int state;	// extern definition of the variable
+extern int state;	//extern definition of the variable
 
 //-------- For use in drawing --------------
 static float gDrawRotateAngle = 0;			
@@ -122,18 +105,6 @@ void apply_material(const C_STRUCT aiMaterial* mtl);
 
 void recursive_render(const C_STRUCT aiScene* sc, const C_STRUCT aiNode* nd);
 
-void DrawArrow(static short direction);					// Funktionierender Pfeil, ausgerichtet, mit Motion
-
-void ArrowMotion(float timeDelta);						// Updates the motion of the arrow
-
-void DrawTeapot(void);									// Draws the Teapot
-
-void DrawCheck(void);									//Draw Check
-
-void DrawCross(void);									//Draw cross
-
-void CrossMotion(float timeDelta);						// update the motion parameters of the cross
-
 void drawText(const char *text, int length, int x, int y); // funtion to draw text
 
 void DrawSink(void);
@@ -146,8 +117,6 @@ void DrawBoardCarrotCutKnife(void);
 
 void DrawBoardLeekCutKnife(void);
 
-void DrawBoardCarrotFishLeek(void);
-
 void DrawPotWaterOnStove(void);
 
 void DrawPotWaterInSink(void);
@@ -155,8 +124,6 @@ void DrawPotWaterInSink(void);
 void DrawWashFood(void);
 
 void DrawSoupDone(void);
-
-void DrawFoodInStove(void);
 
 void DrawServeFood(void);
 
@@ -517,6 +484,20 @@ static int moveDirection = 0;
 static GLfloat lastValue = 0;
 
 //****** models and scenes ******//
+
+	//COLOR VALUES FOR MODELS
+	/*
+	Model	color	R,G,B
+	pot		grey	0.662, 0.662, 0.662
+	carrot	orange	0.929, 0.568, 0.129
+	knife	silver	0.831, 0.847, 0.945
+	board	brown	0.482, 0.192, 0.058
+	fish	pink	0.349, 0.529, 0.486
+	meat	pink	0.988, 0.337, 0.337
+	water	blue	0.447, 0.807, 0.952
+	leek	green	0, 0.564, 0.352
+	leek	white	0.901, 0.917, 0.905
+	*/
 
 void DrawSink(void)
 {
@@ -1186,182 +1167,7 @@ void DrawServeFood(void)
 	glPopMatrix();					// Restore world coordinate system.
 }
 
-//Default model
-void neuesModell()
-{
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-
-	glTranslatef(0.0, 0.1, 0.0);	//translate y +0.1
-	glRotatef(90.0, 0.0, 0.0, 1.0); //rotate 90 to left
-	glScalef(0.1, 0.1, 0.1);		//scale 0,1
-
-	glLineWidth(1.0);				//liniendicke
-	glColor3f(0.0, 0.0, 0.5);		//color
-
-	//***
-	//Modell
-	glBegin(GL_TRIANGLES);
-	glVertex3f(0, 0, 0);
-	glVertex3f(0, 1, 0);
-	glVertex3f(1, 1, 0);
-	glEnd();
-	//***
-
-	glPopMatrix();					// Restore world coordinate system.
-}
-
-void DrawArrow(static short direction)		// Rotating arrow
-{
-	glLoadIdentity;
-	glPushMatrix();						// Save world coordinate system.
-
-	if (direction == 1) //moving arrow in
-	{
-
-		// Place base of cube on marker surface.
-		glTranslatef(0.0, 0.0, 0.0);	// set to marker origin
-		glRotatef(90.0, 1.0, 1.0, 1.0); // rotate arrow
-
-		//moving the arrow
-		if (xmove_1 > 0.5)
-			xmove_1 = 0;
-		glTranslatef(xmove_1, 0.0, 0.0);	// move in the xmove_1 specifed range
-
-		//Select arrow color
-		glDisable(GL_LIGHTING);				// Just use colours.
-		glColor3f(1.0, 0.0, 0.0);
-		//Draw the arrow quader
-		glBegin(GL_POLYGON);				// Quader
-		glVertex3f(0.0, 0.0, 0.0);			// x, z, y
-		glVertex3f(0.0, 0.0, 0.25);
-		glVertex3f(1.5, 0.0, 0.25);
-		glVertex3f(1.5, 0.0, 0.0);
-		glEnd();
-		//draw the arrow triangle
-		glBegin(GL_TRIANGLES);				// Triangle
-		glVertex3f(1.5, 0.0, 0.375);
-		glVertex3f(2.0, 0.0, 0.125);
-		glVertex3f(1.5, 0.0, -0.125);
-		glEnd();
-		glPopMatrix();						// Restore world coordinate system.
-
-	}
-
-	if (direction == 2) //moving arrow out
-	{
-		glTranslatef(0.75, 0.0, -0.75);		// set base of the arrow (x, z , -y)
-		glRotatef(270.0, -1.0, -1.0, -1.0); // rotate arrow
-
-		//move the arrow
-		if (xmove_2 > 0.5)					// an dieser Stelle ist es überflüssig 2 mal move zu generieren, nur Abtrennungshalber existieren zwei
-			xmove_2 = 0;
-		glTranslatef(xmove_2, 0.0, 0.0);	// move in the xmove_2 specifed range
-
-		//Select arrow color
-		glDisable(GL_LIGHTING);				// Just use colours.
-		glColor3f(0.0, 1.0, 0.0);			// Green
-		//Draw the arrow quader
-		glBegin(GL_POLYGON);				//Quader
-		glVertex3f(0.0, 0.0, 0.0);			//x, z, y
-		glVertex3f(0.0, 0.0, 0.25);
-		glVertex3f(1.5, 0.0, 0.25);
-		glVertex3f(1.5, 0.0, 0.0);
-		glEnd();
-		//draw the arrow triangle
-		glBegin(GL_TRIANGLES);				//Dreieck
-		glVertex3f(0.0, 0.0, 0.375);
-		glVertex3f(-0.5, 0.0, 0.125);
-		glVertex3f(0.0, 0.0, -0.125);
-		glEnd();
-		glPopMatrix();						// Restore world coordinate system.
-	}
-
-}
-
-void DrawTeapot(void)				//Das zu "bearbeitende" Objekt, Teekanne 
-{
-	GLfloat   mat_ambient[] = { 0.0, 0.0, 1.0, 1.0 };
-	GLfloat   mat_flash[] = { 0.0, 0.0, 1.0, 1.0 };
-	GLfloat   mat_flash_shiny[] = { 50.0 };
-	GLfloat   light_position[] = { 100.0, -200.0, 200.0, 0.0 };
-	GLfloat   ambi[] = { 0.1, 0.1, 0.1, 0.1 };
-	GLfloat   lightZeroColor[] = { 0.9, 0.9, 0.9, 0.1 };
-
-	// set the material 
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, ambi);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, lightZeroColor);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_flash);
-	glMaterialfv(GL_FRONT, GL_SHININESS, mat_flash_shiny);
-	glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
-
-	glRotatef(90, 1.0, 0.0, 0.0);
-	glTranslatef(0.0, 1.0, 0.0);			// set a new position raltive to the detected marker centre x,-y,z
-
-	glutSolidTeapot(1);						// build a teapot
-
-	glDisable(GL_LIGHTING);
-}
-
-void DrawCheck()					// for state 4: Draw check
-{
-
-	glLineWidth(7.5);
-	glColor3f(0.0, 0.8, 0.4);			// Green
-	glBegin(GL_LINES);
-
-	glVertex3f(1, 1, 1.2);
-	glVertex3f(-0.5, -1, 1.2);
-	glEnd();
-	glBegin(GL_LINES);
-	glVertex3f(-0.5, -1, 1.2);
-	glVertex3f(-1, -0.25, 1.2);
-	glEnd();
-
-}
-
-void DrawCross()					// 
-{
-	glRotatef(crossmotion, 0.0, 1.0, 0.0); // Rotate about z axis.
-	glLineWidth(7.5);
-	glColor3f(1.0, 0.0, 0.0);			// Rot
-	glBegin(GL_LINES);					// front cross
-	glVertex3f(1.2, 1.9, 0.8);
-	glVertex3f(-1.2, 0, 1.9);
-	glEnd();
-	glBegin(GL_LINES);
-	glVertex3f(1.2, 0, 1.9);
-	glVertex3f(-1.2, 1.9, 0.8);
-	glEnd();
-	glBegin(GL_LINES);					// back cross
-	glVertex3f(1.2, 1.9, -0.8);
-	glVertex3f(-1.2, 0, -1.9);
-	glEnd();
-	glBegin(GL_LINES);
-	glVertex3f(1.2, 0, -1.9);
-	glVertex3f(-1.2, 1.9, -0.8);
-	glEnd();
-}
-
 //---- Updating functions in idl() loop --------------
-
-void ArrowMotion(float timeDelta)			// updating the moving arrow parameter by idle()
-{
-	if (state == 1)
-		xmove_1 = xmove_1 + 0.5f * timeDelta;
-	if (state == 2)
-		xmove_2 = xmove_2 + 0.5f * timeDelta;
-}
-
-void CrossMotion(float timeDelta)			// updating the crossmotion bei idle()
-{
-	crossmotion += timeDelta * 45.0f;		// Rotate Kreuz at 45 degrees per second.
-	if (crossmotion > 360.0f)
-		crossmotion -= 360.0f;
-}
 
 void drawText(const char* text, int length, int x, int y) // funtion to draw text
 {
@@ -1401,7 +1207,6 @@ void drawText(const char* text, int length, int x, int y) // funtion to draw tex
 
 
 }
-
 
 static void releaseModels()
 {
