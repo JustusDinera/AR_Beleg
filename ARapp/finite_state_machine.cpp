@@ -21,129 +21,207 @@ void fsm()	// Finite state machine
 	if (state == 0)						//Initialschritt
 	{
 		//output ar content
-		DrawBoardCarrotFishLeek();
+		DrawBoardCarrotLeek();
 
 		//output text
 		std::string text;		// definition textstring
-		text = "";			// text content
+		text = "Willkommen zu dieser Kochanleitung!";			// text content
+		glColor3f(1, 0, 0);		// text color e.g. (1,0,0 red)
+		drawText(text.data(), text.size(), 10, 10); //textstring, textlength (from xstring), position x,y (origin lower left 0,0)
+	}
+
+	//*********************** state 0 *****************************
+	if (state == 1)						//Initialschritt
+	{
+		//output ar content
+		DrawBoardCarrotLeek();
+
+		//output text
+		std::string text;		// definition textstring
+		text = "Zutaten: Karotte und Lauch";			// text content
 		glColor3f(1, 0, 0);		// text color e.g. (1,0,0 red)
 		drawText(text.data(), text.size(), 10, 10); //textstring, textlength (from xstring), position x,y (origin lower left 0,0)
 	}
 
 	//*********************** state 1 *****************************
-	if (state == 1)						//Initialschritt
+	if (state == 2)						//Initialschritt
 	{
 		//output ar content
-		DrawWashFood();
+		DrawBoardFishMeat();
 
 		//output text
 		std::string text;		// definition textstring
-		text = "";			// text content
+		text = "Zutaten: Fish und Rindfleisch";			// text content
 		glColor3f(1, 0, 0);		// text color e.g. (1,0,0 red)
 		drawText(text.data(), text.size(), 10, 10); //textstring, textlength (from xstring), position x,y (origin lower left 0,0
 	}
 
 	//*********************** state 2 *****************************
-	if (state == 2)						//Initialschritt
+	if (state == 3)						//Initialschritt
+	{
+		//output ar content
+		DrawWashFood();
+		
+			//output text
+		std::string text;		// definition textstring
+		text = "Waschen Sie das Gemuese";			// text content
+		glColor3f(1, 0, 0);		// text color e.g. (1,0,0 red)
+		drawText(text.data(), text.size(), 10, 10); //textstring, textlength (from xstring), position x,y (origin lower left 0,0)
+	}
+
+	//*********************** state 3 *****************************
+	if (state == 4)						//Initialschritt
 	{
 		//output ar content
 		DrawBoardCarrotCutKnife();
 
 		//output text
 		std::string text;		// definition textstring
-		text = "";			// text content
-		glColor3f(1, 0, 0);		// text color e.g. (1,0,0 red)
-		drawText(text.data(), text.size(), 10, 10); //textstring, textlength (from xstring), position x,y (origin lower left 0,0)
-	}
-
-	//*********************** state 3 *****************************
-	if (state == 3)						//Initialschritt
-	{
-		//output ar content
-		DrawBoardLeekCutKnife();
-
-		//output text
-		std::string text;		// definition textstring
-		text = "";			// text content
+		text = "Schneiden Sie die Karotte in Scheiben";			// text content
 		glColor3f(1, 0, 0);		// text color e.g. (1,0,0 red)
 		drawText(text.data(), text.size(), 10, 10); //textstring, textlength (from xstring), position x,y (origin lower left 0,0)
 
 	}
 
 	//*********************** state 4 *****************************
-	if (state == 4)						//Initialschritt
+	if (state == 5)						//Initialschritt
+	{
+		//output ar content
+		DrawBoardLeekCutKnife();
+
+		//output text
+		std::string text;		// definition textstring
+		text = "Schneiden Sie den Lauch in Scheiben";			// text content
+		glColor3f(1, 0, 0);		// text color e.g. (1,0,0 red)
+		drawText(text.data(), text.size(), 10, 10); //textstring, textlength (from xstring), position x,y (origin lower left 0,0)
+	}
+
+	//*********************** state 5 *****************************
+	if (state == 6)						//Initialschritt
 	{
 		//output ar content
 		DrawBoardFishCutKnife();
 
 		//output text
 		std::string text;		// definition textstring
-		text = "";			// text content
+		text = "Schneiden Sie den Fisch in vier Scheiben";			// text content
 		glColor3f(1, 0, 0);		// text color e.g. (1,0,0 red)
 		drawText(text.data(), text.size(), 10, 10); //textstring, textlength (from xstring), position x,y (origin lower left 0,0)
 	}
 
-	//*********************** state 5 *****************************
-	if (state == 5)						//Initialschritt
+	//*********************** state 6 *****************************
+	if (state == 7)						//Initialschritt
+	{
+		//output ar content
+		DrawBoardMeatCutKnife();
+
+		//output text
+		std::string text;		// definition textstring
+		text = "Schneiden Sie das Fleisch in Wuerfel";			// text content
+		glColor3f(1, 0, 0);		// text color e.g. (1,0,0 red)
+		drawText(text.data(), text.size(), 10, 10); //textstring, textlength (from xstring), position x,y (origin lower left 0,0)
+	}
+
+	//*********************** state 7 *****************************
+	if (state == 8)						//Initialschritt
 	{
 		//output ar content
 		DrawPotWaterInSink();
 
 		//output text
 		std::string text;		// definition textstring
-		text = "";			// text content
+		text = "Fuellen Sie den Topf mit Wasser";			// text content
 		glColor3f(1, 0, 0);		// text color e.g. (1,0,0 red)
 		drawText(text.data(), text.size(), 10, 10); //textstring, textlength (from xstring), position x,y (origin lower left 0,0)
 	}
 
-	//*********************** state 6 *****************************
-	if (state == 6)						//Initialschritt
+	//*********************** state 8 *****************************
+	if (state == 9)						//Initialschritt
 	{
 		//output ar content
 		DrawPotWaterOnStove();
 
 		//output text
 		std::string text;		// definition textstring
-		text = "";			// text content
+		text = "Stellen Sie den Topf auf den Herd";			// text content
 		glColor3f(1, 0, 0);		// text color e.g. (1,0,0 red)
 		drawText(text.data(), text.size(), 10, 10); //textstring, textlength (from xstring), position x,y (origin lower left 0,0)
 	}
 
-	//*********************** state 7 *****************************
-	if (state == 7)						//Initialschritt
+	//*********************** state 9 *****************************
+	if (state == 10)						//Initialschritt
 	{
 		//output ar content
-		DrawFoodInPot();
+		DrawCarrotInPot();
 
 		//output text
 		std::string text;		// definition textstring
-		text = "";			// text content
+		text = "Fuegen Sie die geschnittenen Karotten hinzu";			// text content
 		glColor3f(1, 0, 0);		// text color e.g. (1,0,0 red)
 		drawText(text.data(), text.size(), 10, 10); //textstring, textlength (from xstring), position x,y (origin lower left 0,0)
 	}
 
-	//*********************** state 8 *****************************
-	if (state == 8)						//Initialschritt
+	//*********************** state 10 *****************************
+	if (state == 11)						//Initialschritt
+	{
+		//output ar content
+		DrawLeekdInPot();
+
+		//output text
+		std::string text;		// definition textstring
+		text = "Fuegen Sie den geschnittenen Lauch hinzu";			// text content
+		glColor3f(1, 0, 0);		// text color e.g. (1,0,0 red)
+		drawText(text.data(), text.size(), 10, 10); //textstring, textlength (from xstring), position x,y (origin lower left 0,0)
+	}
+
+	//*********************** state 11 *****************************
+	if (state == 12)						//Initialschritt
+	{
+		//output ar content
+		DrawFishInPot();
+
+		//output text
+		std::string text;		// definition textstring
+		text = "Fuegen Sie den geschnittenen Fisch hinzu";			// text content
+		glColor3f(1, 0, 0);		// text color e.g. (1,0,0 red)
+		drawText(text.data(), text.size(), 10, 10); //textstring, textlength (from xstring), position x,y (origin lower left 0,0)
+	}
+
+	//*********************** state 12 *****************************
+	if (state == 13)						//Initialschritt
+	{
+		//output ar content
+		DrawMeatInPot();
+
+		//output text
+		std::string text;		// definition textstring
+		text = "Fuegen Sie das gewuerfelte Fleisch hinzu";			// text content
+		glColor3f(1, 0, 0);		// text color e.g. (1,0,0 red)
+		drawText(text.data(), text.size(), 10, 10); //textstring, textlength (from xstring), position x,y (origin lower left 0,0)
+	}
+
+	//*********************** state 13 *****************************
+	if (state == 14)						//Initialschritt
 	{
 		//output ar content
 		DrawSoupDone();
 
 		//output text
 		std::string text;		// definition textstring
-		text = "";			// text content
+		text = "Lassen sie die den Topf 20 Minuten koecheln";			// text content
 		glColor3f(1, 0, 0);		// text color e.g. (1,0,0 red)
 		drawText(text.data(), text.size(), 10, 10); //textstring, textlength (from xstring), position x,y (origin lower left 0,0)
 	}
 
-	//*********************** state 9 *****************************
-	if (state == 9)						//Initialschritt
+	//*********************** state 14 *****************************
+	if (state == 15)						//Initialschritt
 	{
 		//output ar content
 		DrawServeFood();
 
 		//output text
 		std::string text;		// definition textstring
-		text = "";			// text content
+		text = "Die fertige Suppe in eine Schuessel schoepfen und geniessen";			// text content
 		glColor3f(1, 0, 0);		// text color e.g. (1,0,0 red)
 		drawText(text.data(), text.size(), 10, 10); //textstring, textlength (from xstring), position x,y (origin lower left 0,0)
 	}

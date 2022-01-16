@@ -512,6 +512,10 @@ GLfloat transMovment(GLfloat min, GLfloat max, GLfloat stepSize, int* move, GLfl
 	}
 }
 
+
+static int moveDirection = 0;
+static GLfloat lastValue = 0;
+
 //****** models and scenes ******//
 
 void DrawSink(void)
@@ -564,6 +568,66 @@ void DrawStove(void)
 	glPopMatrix();					// Restore world coordinate system.
 }
 
+void DrawBoardCarrotLeek(void)
+{
+	static int moveDirection = 0;
+	static GLfloat lastValue = 0;
+	// ***load board, carrot, fish***
+	//chopping board
+	draw(&board, 2, 2, 2, 0.0, 0.0, 0.0, 0.482, 0.192, 0.058);
+
+	//carrot
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	scale_center_model(carrot, 1.0, 1.0, 1.0);
+	glScalef(1.5, 1.0, 1.0);
+	glTranslatef(0.0, -20.0, 10.0);
+	glColor3f(0.929, 0.568, 0.129);
+	recursive_render(carrot.scene, carrot.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+
+	//leek
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	//scale_center_model(fish, 1.0, 1.0, 1.0);
+	glTranslatef(-0.1, 0.2, 0.2);
+	glScalef(0.025, 0.015, 0.015);
+	glColor3f(0, 0.564, 0.352);
+	recursive_render(leekGreen.scene, leekGreen.scene->mRootNode);	//render Model
+	glColor3f(0.901, 0.917, 0.905);
+	recursive_render(leekWhite.scene, leekWhite.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+}
+
+void DrawBoardFishMeat(void)
+{
+	static int moveDirection = 0;
+	static GLfloat lastValue = 0;
+	// ***load board, carrot, fish***
+	//chopping board
+	draw(&board, 2, 2, 2, 0.0, 0.0, 0.0, 0.482, 0.192, 0.058);
+
+	//meat
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	scale_center_model(meat, 1.0, 1.0, 1.0);
+	glScalef(1.0, 1.0, 1.0);
+	glTranslatef(0, -20.0, 8.0);
+	glColor3f(0.988, 0.337, 0.337);
+	recursive_render(meat.scene, meat.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+
+	//fish
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	scale_center_model(fish, 1.0, 1.0, 1.0);
+	glScalef(1.5, 1.0, 1.0);
+	glTranslatef(-0.6, -0.6, -0.85);
+	glColor3f(0.349, 0.529, 0.486);
+	recursive_render(fish.scene, fish.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+}
+
 void DrawBoardFishCutKnife(void)
 {
 	// ***board, cut fish, knife***
@@ -581,19 +645,12 @@ void DrawBoardFishCutKnife(void)
 	glPopMatrix();					// Restore world coordinate system.
 
 	//knife
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	scale_center_model(knife, 1.0, 1.0, 1.0);
-	glTranslatef(-0.8, -80.0, 100.0);
-	glColor3f(0.349, 0.529, 0.486);
-	recursive_render(knife.scene, knife.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
+	draw(&knife, 1.2, 1.2, 1.2, -0.1, -0.5, upDownMovement(0.2, 0.6, 0.01, &moveDirection, &lastValue), 0.831, 0.847, 0.945);
+
 }
 
 void DrawBoardCarrotCutKnife(void)
 {
-	static int moveDirection = 0;
-	static GLfloat lastValue = 0;
 	// ***board, cut carrot, knife***
 
 	draw(&board, 2, 2, 2, 0, 0, 0, 0.482, 0.192, 0.058);
@@ -628,45 +685,17 @@ void DrawBoardLeekCutKnife(void)
 	draw(&knife, 1.2, 1.2, 1.2, -0.1, -0.5, upDownMovement(0.2, 0.6, 0.01, &moveDirection, &lastValue), 0.831, 0.847, 0.945);
 }
 
-void DrawBoardCarrotFishLeek(void)
+void DrawBoardMeatCutKnife(void)
 {
-	static int moveDirection = 0;
-	static GLfloat lastValue = 0;
-	// ***load board, carrot, fish***
-	//chopping board
-	draw(&board, 2, 2, 2, 0.0, 0.0, 0.0, 0.482, 0.192, 0.058);
+	// ***board, cut fish, knife***
+	//board
+	draw(&board, 2, 2, 2, 0, 0, 0, 0.482, 0.192, 0.058);
 
-	//carrot
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	scale_center_model(carrot, 1.0, 1.0, 1.0);
-	glScalef(1.5, 1.0, 1.0);
-	glTranslatef(0.0, -35.0, 10.0);
-	glColor3f(0.929, 0.568, 0.129);
-	recursive_render(carrot.scene, carrot.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
+	//meat
+	draw(&meatCut, 1, 1, 1, 0, -0.2, 0.15, 0.988, 0.337, 0.337);
 
-	//leek
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	//scale_center_model(fish, 1.0, 1.0, 1.0);
-	glTranslatef(-0.1, -0.2, 0.2);
-	glScalef(0.025, 0.015, 0.015);
-	glColor3f(0, 0.564, 0.352);
-	recursive_render(leekGreen.scene, leekGreen.scene->mRootNode);	//render Model
-	glColor3f(0.901, 0.917, 0.905);
-	recursive_render(leekWhite.scene, leekWhite.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
-
-	//fish
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	scale_center_model(fish, 1.0, 1.0, 1.0);
-	glScalef(1.5, 1.0, 1.0);
-	glTranslatef(-0.6, -0.6, -0.85);
-	glColor3f(0.349, 0.529, 0.486);
-	recursive_render(fish.scene, fish.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
+	//knife
+	draw(&knife, 1.2, 1.2, 1.2, -0.1, -0.5, upDownMovement(0.2, 0.6, 0.01, &moveDirection, &lastValue), 0.831, 0.847, 0.945);
 }
 
 void DrawPotWaterOnStove(void)
@@ -834,7 +863,80 @@ void DrawSoupDone(void)
 
 }
 
-void DrawFoodInPot(void)
+void DrawCarrotInPot(void)
+{
+	// leek position
+	GLfloat start[] = { 0.6, 0.05, 4 };
+	GLfloat endZ = 1.5;
+	GLfloat angle[] = { 90,0,90 };
+	GLfloat static oldValue = 0;
+	int direction = 1;
+	int static turning = 1;
+	GLfloat static rotated[3] = { 0,0,0 };
+	GLfloat stepWidth = 0.05;
+
+	DrawStove();
+
+	//Draw pot with water on stove
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	scale_center_model(pot, 1.0, 1.0, 1.0);
+	glTranslatef(45, -10.0, 372.0);
+	glScalef(0.65, 0.65, 0.65);
+	glColor3f(0.662, 0.662, 0.662);
+	recursive_render(pot.scene, pot.scene->mRootNode);	//render Model
+
+	glColor3f(0.447, 0.807, 0.952);
+	recursive_render(potWater.scene, potWater.scene->mRootNode);	//render Model
+	glPopMatrix();  					// Restore world coordinate system.
+
+
+	if (turning)
+	{
+		glTranslatef(start[X], start[Y], start[Z]); // translate over the stove
+
+		if (rotated[X] < angle[X])
+		{
+			rotated[X]++;
+		}
+		if (rotated[Y] < angle[Y])
+		{
+			rotated[Y]++;
+		}
+		if (rotated[Z] < angle[Z])
+		{
+			rotated[Z]++;
+		}
+		glRotatef(rotated[X], 1, 0, 0);
+		glRotatef(rotated[Y], 0, 1, 0);
+		glRotatef(rotated[Z], 0, 0, 1);
+
+		if (rotated[X] >= angle[X] && rotated[Y] >= angle[Y] && rotated[Z] >= angle[Z])
+		{
+			turning = 0;
+			rotated[X] = 0;
+			rotated[Y] = 0;
+			rotated[Z] = 0;
+		}
+	}
+	else
+	{
+		glTranslatef(start[X], start[Y], transMovment(endZ, start[Z], stepWidth, &direction, &oldValue)); // translate over the stove
+		glRotatef(angle[X], 1, 0, 0);
+		glRotatef(angle[Y], 1, 1, 0);
+		glRotatef(angle[Z], 0, 0, 1);
+
+		if (oldValue >= start[Z] - endZ - stepWidth)
+		{
+			turning = 1;
+		}
+	}
+
+	//Draw carrot
+	draw(&carrotCut, 0.3, 0.3, 0.3, 0.3, 0.3, 0.4, 0.929, 0.568, 0.129);
+}
+
+void DrawLeekdInPot(void)
 {
 	// leek position
 	GLfloat start[] = { 0.6, 0.05, 4 };
@@ -907,16 +1009,152 @@ void DrawFoodInPot(void)
 	//Draw Leek
 	draw(&leekGreenCut, 0.2, 0.2, 0.2, 0.2, 0.3, 0.1, 0, 0.564, 0.352);
 	draw(&leekWhiteCut, 0.3, 0.3, 0.3, 1.5, 0.2, 0.1, 0.901, 0.917, 0.905);
+}
 
-	//Draw carrot
-	draw(&carrotCut, 0.3, 0.3, 0.3, 0.3, 0.3, 0.4, 0.929, 0.568, 0.129);
+void DrawFishInPot(void)
+{
+	// leek position
+	GLfloat start[] = { 0.6, 0.05, 4 };
+	GLfloat endZ = 1.5;
+	GLfloat angle[] = { 90,0,90 };
+	GLfloat static oldValue = 0;
+	int direction = 1;
+	int static turning = 1;
+	GLfloat static rotated[3] = { 0,0,0 };
+	GLfloat stepWidth = 0.05;
 
-	// Draw meat
-	draw(&meatCut, 0.6, 0.6, 0.6, 0.3, 0.15, 0.3, 0.988, 0.337, 0.337);
+	DrawStove();
 
+	//Draw pot with water on stove
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	scale_center_model(pot, 1.0, 1.0, 1.0);
+	glTranslatef(45, -10.0, 372.0);
+	glScalef(0.65, 0.65, 0.65);
+	glColor3f(0.662, 0.662, 0.662);
+	recursive_render(pot.scene, pot.scene->mRootNode);	//render Model
+
+	glColor3f(0.447, 0.807, 0.952);
+	recursive_render(potWater.scene, potWater.scene->mRootNode);	//render Model
+	glPopMatrix();  					// Restore world coordinate system.
+
+
+	if (turning)
+	{
+		glTranslatef(start[X], start[Y], start[Z]); // translate over the stove
+
+		if (rotated[X] < angle[X])
+		{
+			rotated[X]++;
+		}
+		if (rotated[Y] < angle[Y])
+		{
+			rotated[Y]++;
+		}
+		if (rotated[Z] < angle[Z])
+		{
+			rotated[Z]++;
+		}
+		glRotatef(rotated[X], 1, 0, 0);
+		glRotatef(rotated[Y], 0, 1, 0);
+		glRotatef(rotated[Z], 0, 0, 1);
+
+		if (rotated[X] >= angle[X] && rotated[Y] >= angle[Y] && rotated[Z] >= angle[Z])
+		{
+			turning = 0;
+			rotated[X] = 0;
+			rotated[Y] = 0;
+			rotated[Z] = 0;
+		}
+	}
+	else
+	{
+		glTranslatef(start[X], start[Y], transMovment(endZ, start[Z], stepWidth, &direction, &oldValue)); // translate over the stove
+		glRotatef(angle[X], 1, 0, 0);
+		glRotatef(angle[Y], 1, 1, 0);
+		glRotatef(angle[Z], 0, 0, 1);
+
+		if (oldValue >= start[Z] - endZ - stepWidth)
+		{
+			turning = 1;
+		}
+	}
 	// Draw fish
 	draw(&fishCut, 0.8, 0.8, 0.8, -0.5, -1, -0.8, 0.349, 0.529, 0.486);
 	//glPopMatrix();
+}
+
+void DrawMeatInPot(void)
+{
+	// leek position
+	GLfloat start[] = { 0.6, 0.05, 4 };
+	GLfloat endZ = 1.5;
+	GLfloat angle[] = { 90,0,90 };
+	GLfloat static oldValue = 0;
+	int direction = 1;
+	int static turning = 1;
+	GLfloat static rotated[3] = { 0,0,0 };
+	GLfloat stepWidth = 0.05;
+
+	DrawStove();
+
+	//Draw pot with water on stove
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	scale_center_model(pot, 1.0, 1.0, 1.0);
+	glTranslatef(45, -10.0, 372.0);
+	glScalef(0.65, 0.65, 0.65);
+	glColor3f(0.662, 0.662, 0.662);
+	recursive_render(pot.scene, pot.scene->mRootNode);	//render Model
+
+	glColor3f(0.447, 0.807, 0.952);
+	recursive_render(potWater.scene, potWater.scene->mRootNode);	//render Model
+	glPopMatrix();  					// Restore world coordinate system.
+
+
+	if (turning)
+	{
+		glTranslatef(start[X], start[Y], start[Z]); // translate over the stove
+
+		if (rotated[X] < angle[X])
+		{
+			rotated[X]++;
+		}
+		if (rotated[Y] < angle[Y])
+		{
+			rotated[Y]++;
+		}
+		if (rotated[Z] < angle[Z])
+		{
+			rotated[Z]++;
+		}
+		glRotatef(rotated[X], 1, 0, 0);
+		glRotatef(rotated[Y], 0, 1, 0);
+		glRotatef(rotated[Z], 0, 0, 1);
+
+		if (rotated[X] >= angle[X] && rotated[Y] >= angle[Y] && rotated[Z] >= angle[Z])
+		{
+			turning = 0;
+			rotated[X] = 0;
+			rotated[Y] = 0;
+			rotated[Z] = 0;
+		}
+	}
+	else
+	{
+		glTranslatef(start[X], start[Y], transMovment(endZ, start[Z], stepWidth, &direction, &oldValue)); // translate over the stove
+		glRotatef(angle[X], 1, 0, 0);
+		glRotatef(angle[Y], 1, 1, 0);
+		glRotatef(angle[Z], 0, 0, 1);
+
+		if (oldValue >= start[Z] - endZ - stepWidth)
+		{
+			turning = 1;
+		}
+	}
+
+	// Draw meat
+	draw(&meatCut, 0.6, 0.6, 0.6, 0.3, 0.15, 0.3, 0.988, 0.337, 0.337);
 }
 
 void DrawServeFood(void)
