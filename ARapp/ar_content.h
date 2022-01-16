@@ -24,23 +24,9 @@
 #include <assimp/postprocess.h>
 
 // ============================================================================
-//	Global definitions
+//	Global declarations
 // ============================================================================
-
-
-
-
-int loadasset(aiVector3D* scene_min, aiVector3D* scene_max, const C_STRUCT aiScene* scene, aiVector3D* scene_center);
-void get_bounding_box_for_node(const C_STRUCT aiNode* nd,
-	C_STRUCT aiVector3D* min,
-	C_STRUCT aiVector3D* max,
-	C_STRUCT aiMatrix4x4* trafo,
-	const aiScene* scene
-);
-void get_bounding_box(C_STRUCT aiVector3D* min, C_STRUCT aiVector3D* max, const aiScene* C_STRUCT scene);
-
-// the global Assimp scene object class
-
+// --------- global Class // the global Assimp scene object class -------------
 class MODEL
 {
 public:
@@ -52,25 +38,19 @@ public:
 	C_STRUCT aiVector3D scene_min, scene_max, scene_center;
 };
 
-MODEL::MODEL(char* path_model)
-{
-	//scene = NULL;
-	scene_list = 0;
+// --------- precompiler declarations
 
-	// Load the model file.
-	scene = aiImportFile(path_model, aiProcessPreset_TargetRealtime_MaxQuality);
+#define aisgl_min(x,y) (x<y?x:y)
+#define aisgl_max(x,y) (y>x?y:x)
 
-	if (0 != loadasset(&this->scene_min, &this->scene_max, this->scene, &this->scene_center)) {
-		printf_s("Failed to load model. Please ensure that the specified file exists.");
-	}
+//----------- Global variables
 
-}
+GLfloat xmove_1, ymove_1, zmove_1 = 0;		//Pfeilmotion Translatef-Parameter für state ==1
+GLfloat xmove_2, ymove_2, zmove_2 = 0;		//Pfeilmotion Translatef-Parameter für state ==2
 
-MODEL::~MODEL()
-{
-}
+GLfloat crossmotion = 0;						//Drehparameter des Kreuzes
 
-// the global Assimp scene 
+//-------- the global Assimp scene -----------
 MODEL knife("../Models/knife.stl");
 MODEL board("../Models/board.stl");
 MODEL pot("../Models/pot.stl");
@@ -101,12 +81,111 @@ MODEL bowlUpper("../Models/bowlUpper.stl");
 MODEL bowlInner("../Models/bowlInner.stl");
 MODEL spoon("../Models/spoon.stl");
 
+extern int state;	// extern definition of the variable
+
+//-------- For use in drawing --------------
+static float gDrawRotateAngle = 0;			
+static int	 gDrawRotate = FALSE;
+
+//----------- Global functions ---------------
+
+int loadasset(aiVector3D* scene_min, aiVector3D* scene_max, const C_STRUCT aiScene* scene, aiVector3D* scene_center);
+void get_bounding_box_for_node(const C_STRUCT aiNode* nd,
+	C_STRUCT aiVector3D* min,
+	C_STRUCT aiVector3D* max,
+	C_STRUCT aiMatrix4x4* trafo,
+	const aiScene* scene);
+
+	void get_bounding_box(C_STRUCT aiVector3D* min, C_STRUCT aiVector3D* max, const aiScene* C_STRUCT scene);
+
+int loadasset(aiVector3D* scene_min, aiVector3D* scene_max, const C_STRUCT aiScene* scene, aiVector3D* scene_center);
+
+void get_bounding_box_for_node(
+	const C_STRUCT aiNode* nd,
+	C_STRUCT aiVector3D* min,
+	C_STRUCT aiVector3D* max,
+	C_STRUCT aiMatrix4x4* trafo,
+	const aiScene* scene);
+
+void get_bounding_box(C_STRUCT aiVector3D* min, C_STRUCT aiVector3D* max, const aiScene* C_STRUCT scene);
+
+void scale_center_model(MODEL model, ai_real x, ai_real y, ai_real z);
+
+void color4_to_float4(const C_STRUCT aiColor4D* c, float f[4]);
+
+void set_float4(float f[4], float a, float b, float c, float d);
+
+void apply_material(const C_STRUCT aiMaterial* mtl);
+
+void recursive_render(const C_STRUCT aiScene* sc, const C_STRUCT aiNode* nd);
+
+void DrawArrow(static short direction);					// Funktionierender Pfeil, ausgerichtet, mit Motion
+
+void ArrowMotion(float timeDelta);						// Updates the motion of the arrow
+
+void DrawTeapot(void);									// Draws the Teapot
+
+void DrawCheck(void);									//Draw Check
+
+void DrawCross(void);									//Draw cross
+
+void CrossMotion(float timeDelta);						// update the motion parameters of the cross
+
+void drawText(const char *text, int length, int x, int y); // funtion to draw text
+
+void DrawSink(void);
+
+void DrawStove(void);
+
+void DrawBoardFishCutKnife(void);
+
+void DrawBoardCarrotCutKnife(void);
+
+void DrawBoardLeekCutKnife(void);
+
+void DrawBoardCarrotFishLeek(void);
+
+void DrawPotWaterOnStove(void);
+
+void DrawPotWaterInSink(void);
+
+void DrawWashFood(void);
+
+void DrawSoupDone(void);
+
+void DrawFoodInStove(void);
+
+void DrawServeFood(void);
+
+
+// ============================================================================
+//	Global definitions
+// ============================================================================
+
+MODEL::MODEL(char* path_model)
+{
+	//scene = NULL;
+	scene_list = 0;
+
+	// Load the model file.
+	scene = aiImportFile(path_model, aiProcessPreset_TargetRealtime_MaxQuality);
+
+	if (0 != loadasset(&this->scene_min, &this->scene_max, this->scene, &this->scene_center)) {
+		printf_s("Failed to load model. Please ensure that the specified file exists.");
+	}
+}
+
+MODEL::~MODEL()
+{
+	// free space to avoid ressource leakage (assimp)
+	//aiReleaseImport(this->scene);
+}
+
 // load the model to the scene
 int loadasset(aiVector3D* scene_min, aiVector3D* scene_max, const C_STRUCT aiScene* scene, aiVector3D* scene_center)
 {
 	/* we are taking one of the postprocessing presets to avoid
 	   spelling out 20+ single postprocessing flags here. */
-
 	if (scene) {
 		get_bounding_box(scene_min, scene_max, scene);
 		scene_center->x = (scene_min->x + scene_max->x) / 2.0f;
@@ -116,9 +195,6 @@ int loadasset(aiVector3D* scene_min, aiVector3D* scene_max, const C_STRUCT aiSce
 	}
 	return 1;
 }
-
-#define aisgl_min(x,y) (x<y?x:y)
-#define aisgl_max(x,y) (y>x?y:x)
 
 // set the bounds of the node of the model
 void get_bounding_box_for_node(const C_STRUCT aiNode* nd,
@@ -136,7 +212,6 @@ void get_bounding_box_for_node(const C_STRUCT aiNode* nd,
 	for (; n < nd->mNumMeshes; ++n) {
 		const C_STRUCT aiMesh* mesh = scene->mMeshes[nd->mMeshes[n]];
 		for (t = 0; t < mesh->mNumVertices; ++t) {
-
 			C_STRUCT aiVector3D tmp = mesh->mVertices[t];
 			aiTransformVecByMatrix4(&tmp, trafo);
 
@@ -177,7 +252,6 @@ void scale_center_model(MODEL model, ai_real x, ai_real y, ai_real z) {
 
 	// center the model 
 	glTranslatef(-model.scene_center.x + x, -model.scene_center.y + y, -model.scene_center.z + z);
-
 }
 
 // convert a color array to a float array
@@ -197,7 +271,6 @@ void set_float4(float f[4], float a, float b, float c, float d)
 	f[2] = c;
 	f[3] = d;
 }
-
 
 // set the surface of the models
 void apply_material(const C_STRUCT aiMaterial* mtl)
@@ -326,58 +399,7 @@ void recursive_render(const C_STRUCT aiScene* sc, const C_STRUCT aiNode* nd)
 	glPopMatrix();
 }
 
-void DrawArrow(static short direction);					// Funktionierender Pfeil, ausgerichtet, mit Motion
-
-void ArrowMotion(float timeDelta);						// Updates the motion of the arrow
-
-void DrawTeapot(void);									// Draws the Teapot
-
-void DrawCheck(void);									//Draw Check
-
-void DrawCross(void);									//Draw cross
-
-void CrossMotion(float timeDelta);						// update the motion parameters of the cross
-
-void drawText(const char *text, int length, int x, int y); // funtion to draw text
-
-void DrawSink(void);
-
-void DrawStove(void);
-
-void DrawBoardFishCutKnife(void);
-
-void DrawBoardCarrotCutKnife(void);
-
-void DrawBoardLeekCutKnife(void);
-
-void DrawBoardCarrotFishLeek(void);
-
-void DrawPotWaterOnStove(void);
-
-void DrawPotWaterInSink(void);
-
-void DrawWashFood(void);
-
-void DrawSoupDone(void);
-
-void DrawFoodInStove(void);
-
-void DrawServeFood(void);
-
-
-//----------- Global variables
-
-GLfloat xmove_1, ymove_1, zmove_1 = 0;		//Pfeilmotion Translatef-Parameter für state ==1
-GLfloat xmove_2, ymove_2, zmove_2 = 0;		//Pfeilmotion Translatef-Parameter für state ==2
-
-GLfloat crossmotion = 0;						//Drehparameter des Kreuzes
-
-extern int state;	// extern definition of the variable
-
 //----------- Drawing --------------------------
-
-static float gDrawRotateAngle = 0;			// For use in drawing.
-static int	 gDrawRotate = FALSE;
 
 //Draw model and scale to scene; model - scale - translate - color
 void draw(
@@ -448,7 +470,6 @@ void DrawSink(void)
 	// ***Sink***
 	glLoadIdentity;
 	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
 	glScalef(0.03, 0.03, 0.03);
 	glColor3f(1.0, 1.0, 1.0);
 	recursive_render(sink.scene, sink.scene->mRootNode);	//render Model
@@ -456,7 +477,6 @@ void DrawSink(void)
 
 	glLoadIdentity;
 	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
 	glScalef(0.03, 0.03, 0.03);
 	glColor3f(1.0, 0.0, 0.0);
 	recursive_render(sinkDoor.scene, sinkDoor.scene->mRootNode);	//render Model
@@ -464,12 +484,10 @@ void DrawSink(void)
 
 	glLoadIdentity;
 	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
 	glScalef(0.03, 0.03, 0.03);
 	glColor3f(1.0, 1.0, 0.0);
 	recursive_render(sinkFaucet.scene, sinkFaucet.scene->mRootNode);	//render Model
 	glPopMatrix();					// Restore world coordinate system.
-
 }
 
 void DrawStove(void)
@@ -477,7 +495,6 @@ void DrawStove(void)
 	// ***stove***
 	glLoadIdentity;
 	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
 	glScalef(0.03, 0.03, 0.03);
 	glColor3f(1.0, 1.0, 1.0);
 	recursive_render(stove.scene, stove.scene->mRootNode);	//render Model
@@ -485,7 +502,6 @@ void DrawStove(void)
 
 	glLoadIdentity;
 	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
 	glScalef(0.03, 0.03, 0.03);
 	glColor3f(0.0, 0.0, 0.0);
 	recursive_render(stoveBlack.scene, stoveBlack.scene->mRootNode);	//render Model
@@ -493,12 +509,10 @@ void DrawStove(void)
 
 	glLoadIdentity;
 	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
 	glScalef(0.03, 0.03, 0.03);
 	glColor3f(1.0, 1.0, 0.0);
 	recursive_render(stoveDoor.scene, stoveDoor.scene->mRootNode);	//render Model
 	glPopMatrix();					// Restore world coordinate system.
-
 }
 
 void DrawBoardFishCutKnife(void)
@@ -525,7 +539,6 @@ void DrawBoardFishCutKnife(void)
 	glColor3f(0.349, 0.529, 0.486);
 	recursive_render(knife.scene, knife.scene->mRootNode);	//render Model
 	glPopMatrix();					// Restore world coordinate system.
-
 }
 
 void DrawBoardCarrotCutKnife(void)
@@ -571,7 +584,6 @@ void DrawBoardCarrotFishLeek(void)
 	static int moveDirection = 0;
 	static GLfloat lastValue = 0;
 	// ***load board, carrot, fish***
-
 	//chopping board
 	draw(&board, 2, 2, 2, 0.0, 0.0, 0.0, 0.482, 0.192, 0.058);
 
@@ -606,7 +618,6 @@ void DrawBoardCarrotFishLeek(void)
 	glColor3f(0.349, 0.529, 0.486);
 	recursive_render(fish.scene, fish.scene->mRootNode);	//render Model
 	glPopMatrix();					// Restore world coordinate system.
-
 }
 
 void DrawPotWaterOnStove(void)
@@ -1022,7 +1033,6 @@ void CrossMotion(float timeDelta)			// updating the crossmotion bei idle()
 }
 
 void drawText(const char* text, int length, int x, int y) // funtion to draw text
-
 {
 
 	glMatrixMode(GL_PROJECTION);
@@ -1061,7 +1071,8 @@ void drawText(const char* text, int length, int x, int y) // funtion to draw tex
 
 }
 
-void releaseModels()
+
+static void releaseModels()
 {
 	// free space to avoid ressource leakage (assimp)
 	aiReleaseImport(knife.scene);
@@ -1093,5 +1104,4 @@ void releaseModels()
 	aiReleaseImport(bowlInner.scene);
 	aiReleaseImport(spoon.scene);
 }
-
 #endif

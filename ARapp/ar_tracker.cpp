@@ -51,7 +51,6 @@ void init_marker(void);
 //------------- Setup AR-Camera
 
 void init_cam(void)
-
 {
 	//path to the camera parameter data
 	const char *cparam_name = "../Data/camera_para.dat";    

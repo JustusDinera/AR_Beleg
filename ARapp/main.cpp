@@ -65,8 +65,7 @@ enum coord { X, Y, Z };
 #define aisgl_min(x,y) (x<y?x:y)			// Inline Function min for model placement
 #define aisgl_max(x,y) (y>x?y:x)			// Inline Function max for model placement
 
-// funktion definitions
-int loadasset(aiVector3D* scene_min, aiVector3D* scene_max, const C_STRUCT aiScene* scene, aiVector3D* scene_center);
+
 
 //---- external function declaration -------------------
 void ar_tracker(void);
@@ -105,15 +104,6 @@ MODEL::~MODEL()
 	aiReleaseImport(this->scene);
 }
 */
-
-
-// ============================================================================
-//	Constants
-// ============================================================================
-
-
-
-
 
 // ============================================================================
 //	Global variables
@@ -170,6 +160,22 @@ extern int			gPatt_found;			// Per-marker, but we are using only 1 marker
 
 // ============================================================================
 //	Function declaration
+// ============================================================================
+static void Visibility(int visible);
+
+//	This function is called when the GLUT window is resized.
+static void Reshape(int w, int h);
+
+// This function is the display handler of this program and called when the window needs redrawing.
+static void Display(void);
+
+// funktion definitions
+int loadasset(aiVector3D* scene_min, aiVector3D* scene_max, const C_STRUCT aiScene* scene, aiVector3D* scene_center);
+
+
+
+// ============================================================================
+//	Function definition
 // ============================================================================
 /*
 // set the bounds of the node of the model
@@ -338,8 +344,7 @@ static void Visibility(int visible)
 }
 
 
-//	This function is called when the
-//	GLUT window is resized.
+//	This function is called when the GLUT window is resized.
 static void Reshape(int w, int h)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
