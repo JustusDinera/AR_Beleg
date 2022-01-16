@@ -1,4 +1,4 @@
-/* This File includes the Main function and the setup calls für arToolKit and OpenGL
+/* This File includes the Main function and the setup calls fÃ¼r arToolKit and OpenGL
 *  main.c
 *
 */
@@ -48,12 +48,21 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+
 //#include "ModelTest.h"
-// 
+
+// deinition of coordinates
+enum coord { X, Y, Z };
+
 // ============================================================================
 //	Global definitions
 // ============================================================================
-//int loadasset(aiVector3D* scene_min, aiVector3D* scene_max, const C_STRUCT aiScene* scene, aiVector3D* scene_center);
+
+#define aisgl_min(x,y) (x<y?x:y)
+#define aisgl_max(x,y) (y>x?y:x)
+
+int loadasset(aiVector3D* scene_min, aiVector3D* scene_max, const C_STRUCT aiScene* scene, aiVector3D* scene_center);
+
 
 /*
 // the global Assimp scene object class
@@ -78,13 +87,12 @@ MODEL::MODEL(char* path_model)
 	scene = aiImportFile(path_model, aiProcessPreset_TargetRealtime_MaxQuality);
 
 	if (0 != loadasset(&this->scene_min, &this->scene_max, this->scene, &this->scene_center)) {
-		printf_s("Failed to load model. Please ensure that the specified file exists.");
+		printf_s("Failed to load model. Please ensure that the specified file exists. %s\n",path_model);
 	}
-	
 }
-
 MODEL::~MODEL()
 {
+	aiReleaseImport(this->scene);
 }
 */
 
@@ -121,15 +129,12 @@ MODEL leekGreen("../Models/leekGreen.stl");
 MODEL leekWhite("../Models/leekWhite.stl");
 MODEL leekGreenCut("../Models/leekGreenCut.stl");
 MODEL leekWhiteCut("../Models/leekWhiteCut.stl");
-
 MODEL sink("../Models/sink.stl");
 MODEL sinkDoor("../Models/sinkDoor.stl");
 MODEL sinkFaucet("../Models/sinkFaucet.stl");
-
 MODEL stove("../Models/stove.stl");
 MODEL stoveBlack("../Models/stoveBlack.stl");
 MODEL stoveDoor("../Models/stoveDoor.stl");
-
 MODEL table("../Models/table.obj");
 MODEL bowlLower("../Models/bowlLower.stl");
 MODEL bowlUpper("../Models/bowlUpper.stl");
@@ -140,14 +145,11 @@ MODEL spoon("../Models/spoon.stl");
 
 
 // Setup the size of the openGL Window
-static int prefWidth = 800;					// Fullscreen mode width.
-static int prefHeight = 600;				// Fullscreen mode height.
+static int prefWidth = 1280;					// Fullscreen mode width.
+static int prefHeight = 720;				// Fullscreen mode height.
 // Setup puffer depth and refresh rate
 static int prefDepth = 32;					// Fullscreen mode bit depth.
 static int prefRefresh = 0;					// Fullscreen mode refresh rate. Set to 0 to use default rate.
-
-
-
 
 ARGL_CONTEXT_SETTINGS_REF gArglSettings = NULL; // Open GL init settings
 
@@ -168,10 +170,6 @@ void init_marker(void);
 // ============================================================================
 
 
-#define aisgl_min(x,y) (x<y?x:y)
-#define aisgl_max(x,y) (y>x?y:x)
-
-/*
 // set the bounds of the node of the model
 void get_bounding_box_for_node(const C_STRUCT aiNode* nd,
 	C_STRUCT aiVector3D* min,
@@ -436,11 +434,12 @@ void draw(
 	glPopMatrix();					// Restore world coordinate system.
 }
 
-GLfloat upDownMovement(GLfloat min, GLfloat max, GLfloat stepSize, int* move, GLfloat* oldValue) {
-	static int state = 0; // 0 = up; 1 = down
-	static GLfloat prevValue = 0;
+GLfloat transMovment(GLfloat min, GLfloat max, GLfloat stepSize, int* move, GLfloat* oldValue) {
+	//static int state = 0; // 0 = up; 1 = down
+	//static GLfloat prevValue = 0;
 	static unsigned int prevTime = 0;
 	unsigned int msTime;
+	GLfloat absoluteValue = max - min;
 
 	msTime = glutGet(GLUT_ELAPSED_TIME);
 
@@ -451,27 +450,33 @@ GLfloat upDownMovement(GLfloat min, GLfloat max, GLfloat stepSize, int* move, GL
 
 	if (msTime - prevTime > 20)
 	{
-		prevValue += stepSize;
+		*oldValue += stepSize;
 		prevTime = msTime;
+
+	}
+	
+	if (absoluteValue < 0)
+	{
+		absoluteValue = absoluteValue * -1;
 	}
 
-	if (max - min < prevValue)
+	if (absoluteValue < *oldValue)
 	{
-		if (state)
-			state = 0;
+		if (*move)
+			*move = 0;
 		else
-			state = 1;
+			*move = 1;
 
-		prevValue = 0;
+		*oldValue = 0;
 	}
 
-	if (state)
+	if (*move)
 	{
-		return (max - prevValue);
+		return (max - *oldValue);
 	}
 	else
 	{
-		return (min + prevValue);
+		return (min + *oldValue);
 	}
 }
 
@@ -573,7 +578,7 @@ void DrawBoardCarrotCutKnife(void)
 	draw(&carrotCut, 1.5, 1, 1, 0, -0.2, 0.1, 0.929, 0.568, 0.129);
 
 	//knife
-	draw(&knife, 1.2, 1.2, 1.2, -0.1, -0.5, upDownMovement(0.2,0.6,0.01, &moveDirection, &lastValue), 0.831, 0.847, 0.945);
+	draw(&knife, 1.2, 1.2, 1.2, -0.1, -0.5, transMovment(0.2,0.6,0.01, &moveDirection, &lastValue), 0.831, 0.847, 0.945);
 }
 
 void DrawBoardLeekCutKnife(void)
@@ -596,7 +601,7 @@ void DrawBoardLeekCutKnife(void)
 	glPopMatrix();					// Restore world coordinate system.
 
 	//knife
-	draw(&knife, 1.2, 1.2, 1.2, -0.1, -0.5, upDownMovement(0.2, 0.6, 0.01, &moveDirection, &lastValue), 0.831, 0.847, 0.945);
+	draw(&knife, 1.2, 1.2, 1.2, -0.1, -0.5, transMovment(0.2, 0.6, 0.01, &moveDirection, &lastValue), 0.831, 0.847, 0.945);
 }
 
 void DrawBoardCarrotFishLeek(void)
@@ -809,43 +814,88 @@ void DrawSoupDone(void)
 
 void DrawFoodInStove(void)
 {
-	// Draw stove
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
-	glScalef(0.03, 0.03, 0.03);
-	glColor3f(1.0, 1.0, 1.0);
-	recursive_render(stove.scene, stove.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
 
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
-	glScalef(0.03, 0.03, 0.03);
-	glColor3f(0.0, 0.0, 0.0);
-	recursive_render(stoveBlack.scene, stoveBlack.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
+	// leek position
+	GLfloat start[] = { 0.6, 0.05, 4 };
+	GLfloat endZ = 1.5;
+	GLfloat angle[] = { 90,0,90 };
+	GLfloat static oldValue = 0;
+	int direction = 1;
+	int static turning = 1;
+	GLfloat static rotated[3] = { 0,0,0 };
+	GLfloat stepWidth = 0.05;
 
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
-	glScalef(0.03, 0.03, 0.03);
-	glColor3f(1.0, 1.0, 0.0);
-	recursive_render(stoveDoor.scene, stoveDoor.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
+	DrawStove();
 
 	//Draw pot with water on stove
 	glLoadIdentity;
 	glPushMatrix();					//Nullpunkt Weltkoord
 	scale_center_model(pot, 1.0, 1.0, 1.0);
 	glTranslatef(45, -10.0, 372.0);
-	glScalef(0.5, 0.5, 0.5);
+	glScalef(0.65, 0.65, 0.65);
 	glColor3f(0.662, 0.662, 0.662);
 	recursive_render(pot.scene, pot.scene->mRootNode);	//render Model
 
 	glColor3f(0.447, 0.807, 0.952);
 	recursive_render(potWater.scene, potWater.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
+	glPopMatrix();  					// Restore world coordinate system.
+
+
+	if (turning)
+	{
+		glTranslatef(start[X], start[Y], start[Z]); // translate over the stove
+
+		if (rotated[X] < angle[X])
+		{
+			rotated[X]++;
+		}
+		if (rotated[Y] < angle[Y])
+		{
+			rotated[Y]++;
+		}
+		if (rotated[Z] < angle[Z])
+		{
+			rotated[Z]++;
+		}
+		glRotatef(rotated[X], 1, 0, 0);
+		glRotatef(rotated[Y], 0, 1, 0);
+		glRotatef(rotated[Z], 0, 0, 1);
+
+		if (rotated[X] >= angle[X] && rotated[Y] >= angle[Y] && rotated[Z] >= angle[Z])
+		{
+			turning = 0;
+			rotated[X] = 0;
+			rotated[Y] = 0;
+			rotated[Z] = 0;
+		}
+	}
+	else
+	{
+		glTranslatef(start[X], start[Y], transMovment(endZ, start[Z], stepWidth, &direction, &oldValue)); // translate over the stove
+		glRotatef(angle[X], 1, 0, 0);
+		glRotatef(angle[Y], 1, 1, 0);
+		glRotatef(angle[Z], 0, 0, 1);
+
+		if (oldValue >= start[Z]-endZ-stepWidth)
+		{
+			turning = 1;
+		}
+	}
+	
+	//glPushMatrix();
+	//Draw Leek
+	draw(&leekGreenCut, 0.2, 0.2, 0.2, 0.2, 0.3, 0.1, 0, 0.564, 0.352);
+	draw(&leekWhiteCut, 0.3, 0.3, 0.3, 1.5, 0.2, 0.1, 0.901, 0.917, 0.905);
+
+	//Draw carrot
+	draw(&carrotCut, 0.3, 0.3, 0.3, 0.3, 0.3, 0.4, 0.929, 0.568, 0.129);
+
+	// Draw meat
+	draw(&meatCut, 0.6, 0.6, 0.6, 0.3, 0.15, 0.3, 0.988, 0.337, 0.337);
+
+	// Draw fish
+	draw(&fishCut, 0.8, 0.8, 0.8, -0.5, -1, -0.8, 0.349, 0.529, 0.486);
+	//glPopMatrix();
 }
 
 void DrawServeFood(void)
@@ -932,9 +982,17 @@ static void Display(void)
 		//DrawPotWaterOnStove();
 		//DrawSoupDone();
 		//DrawServeFood();
+
 		fsm();
 
 
+ 
+
+		//DrawBoardCarrotCutKnife();
+		//DrawBoardCarrotFish();
+		//DrawPotWater();
+		//DrawStove();
+		DrawFoodInStove();
 
 
 	} 
@@ -1040,6 +1098,7 @@ int main(int argc, char** argv)
 	//               |	main 		|	
 	//				 |	loop		|
 	//				 --------<-------	
+
 
 	//releaseModels();
 
