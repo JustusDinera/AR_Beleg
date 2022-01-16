@@ -57,12 +57,22 @@ enum coord { X, Y, Z };
 // ============================================================================
 //	Global definitions
 // ============================================================================
+// pre compiler definitions
+#define VIEW_SCALEFACTOR		0.025		// 1.0 ARToolKit unit becomes 0.025 of my OpenGL units.
+#define VIEW_DISTANCE_MIN		0.1			// Objects closer to the camera than this will not be displayed.
+#define VIEW_DISTANCE_MAX		100.0		// Objects further away from the camera than this will not be displayed.
 
-#define aisgl_min(x,y) (x<y?x:y)
-#define aisgl_max(x,y) (y>x?y:x)
+#define aisgl_min(x,y) (x<y?x:y)			// Inline Function min for model placement
+#define aisgl_max(x,y) (y>x?y:x)			// Inline Function max for model placement
 
+// funktion definitions
 int loadasset(aiVector3D* scene_min, aiVector3D* scene_max, const C_STRUCT aiScene* scene, aiVector3D* scene_center);
 
+//---- external function declaration -------------------
+void ar_tracker(void);
+int setupMarker(const char* patt_name, int* patt_id);
+void init_cam(void);
+void init_marker(void);
 
 /*
 // the global Assimp scene object class
@@ -101,9 +111,6 @@ MODEL::~MODEL()
 //	Constants
 // ============================================================================
 
-#define VIEW_SCALEFACTOR		0.025		// 1.0 ARToolKit unit becomes 0.025 of my OpenGL units.
-#define VIEW_DISTANCE_MIN		0.1			// Objects closer to the camera than this will not be displayed.
-#define VIEW_DISTANCE_MAX		100.0		// Objects further away from the camera than this will not be displayed.
 
 
 
@@ -154,22 +161,17 @@ static int prefRefresh = 0;					// Fullscreen mode refresh rate. Set to 0 to use
 ARGL_CONTEXT_SETTINGS_REF gArglSettings = NULL; // Open GL init settings
 
 //---------------- External global variables -------------------------
+// ARtoolkit
 extern ARUint8		*gARTImage;				// Pointer contains the video image
 extern ARParam		gARTCparam;				// Camera parameters
 extern double		gPatt_trans[3][4];		// Stores the transformation of the detected markers, Per-marker, but we are using only 1 marker. 
 extern int			gPatt_found;			// Per-marker, but we are using only 1 marker
 
-//---- external function declaration -------------------
-void ar_tracker(void);
-int setupMarker(const char *patt_name, int *patt_id);
-void init_cam(void);
-void init_marker(void);
 
 // ============================================================================
-//	Functions
+//	Function declaration
 // ============================================================================
-
-
+/*
 // set the bounds of the node of the model
 void get_bounding_box_for_node(const C_STRUCT aiNode* nd,
 	C_STRUCT aiVector3D* min,
@@ -929,7 +931,6 @@ void DrawServeFood(void)
 */
 
 // This function is the display handler of this program and called when the window needs redrawing.
-
 static void Display(void)
 {
 	GLdouble p[16];		// Projection matrix
@@ -992,7 +993,7 @@ static void Display(void)
 		//DrawBoardCarrotFish();
 		//DrawPotWater();
 		//DrawStove();
-		DrawFoodInStove();
+		//DrawFoodInStove();
 
 
 	} 
@@ -1079,19 +1080,13 @@ int main(int argc, char** argv)
 	glutVisibilityFunc(Visibility);	
 	// Register the keyboard input function	
 
-
 	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
 	glutKeyboardFunc(Keyboard);
 	glutMouseFunc(onMouseButton);
 
-
-
 	// Transparend background after clear
 	glClearColor(0, 0, 0, 1);
 
-
-
-	
 	//open GL main loop, controls the updates
 	glutMainLoop();		
 	//               -------->--------
@@ -1099,11 +1094,7 @@ int main(int argc, char** argv)
 	//				 |	loop		|
 	//				 --------<-------	
 
-
 	//releaseModels();
-
-	
-
 
 	return (0);
 }
