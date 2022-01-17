@@ -55,7 +55,7 @@ extern int state;	//extern definition of the variable
 	*/
 GLfloat colors[LAST_VALUE][3] =
 {
-	{0.349, 0.529, 0.486}, //KNIFE
+	{0.7, 0.7, 0.7}, //KNIFE
 	{0.482, 0.192, 0.058}, //BOARD
 	{0.662, 0.662, 0.662}, //POT
 	{0.447, 0.807, 0.952}, //POTWATER
@@ -585,14 +585,7 @@ void DrawBoardCarrotLeek(void)
 	draw(&board, 2, 2, 2, 0.0, 0.0, 0.0, colors[BOARD][R], colors[BOARD][G], colors[BOARD][B]);
 
 	//carrot
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	scale_center_model(carrot, 1.0, 1.0, 1.0);
-	glScalef(1.5, 1.0, 1.0);
-	glTranslatef(0.0, -20.0, 10.0);
-	glColor3f(colors[CARROT][R], colors[CARROT][G], colors[CARROT][B]);
-	recursive_render(carrot.scene, carrot.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
+	draw(&carrot,1.5, 1.0, 1.0, 0.0, -0.3, 0.2,colors[CARROT][R], colors[CARROT][G], colors[CARROT][B]);
 
 	//leek
 	glLoadIdentity;
@@ -616,24 +609,10 @@ void DrawBoardFishMeat(void)
 	draw(&board, 2, 2, 2, 0.0, 0.0, 0.0, colors[BOARD][R], colors[BOARD][G], colors[BOARD][B]);
 
 	//meat
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	scale_center_model(meat, 1.0, 1.0, 1.0);
-	glScalef(1.0, 1.0, 1.0);
-	glTranslatef(0, -20.0, 8.0);
-	glColor3f(colors[MEAT][R], colors[MEAT][G], colors[MEAT][B]);
-	recursive_render(meat.scene, meat.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
+	draw(&meat,1.0, 1.0, 1.0, 0, -0.3, 0.2, colors[MEAT][R], colors[MEAT][G], colors[MEAT][B]);
 
 	//fish
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	scale_center_model(fish, 1.0, 1.0, 1.0);
-	glScalef(1.5, 1.0, 1.0);
-	glTranslatef(-0.6, -0.6, -0.85);
-	glColor3f(colors[FISH][R], colors[FISH][G], colors[FISH][B]);
-	recursive_render(fish.scene, fish.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
+	draw(&fish,1.5, 1.0, 1.0,-0.8, -0.6, -0.85,colors[FISH][R], colors[FISH][G], colors[FISH][B]);
 }
 
 void DrawBoardFishCutKnife(void)
@@ -643,18 +622,10 @@ void DrawBoardFishCutKnife(void)
 	draw(&board, 2, 2, 2, 0, 0, 0, colors[BOARD][R], colors[BOARD][G], colors[BOARD][B]);
 
 	//fish
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	scale_center_model(fishCut, 1.0, 1.0, 1.0);
-	glScalef(1.0, 1.0, 1.0);
-	glTranslatef(-1.0, -1.25, -0.85);
-	glColor3f(colors[FISHCUT][R], colors[FISHCUT][G], colors[FISHCUT][B]);
-	recursive_render(fishCut.scene, fishCut.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
+	draw(&fishCut, 1.0, 1.0, 1.0,-1.0, -1.25, -0.85, colors[FISHCUT][R], colors[FISHCUT][G], colors[FISHCUT][B]);
 
 	//knife
-	draw(&knife, 1.2, 1.2, 1.2, -0.1, -0.5, upDownMovement(0.2, 0.6, 0.01, &moveDirection, &lastValue), 0.831, 0.847, 0.945);
-
+	draw(&knife, 1.2, 1.2, 1.2, -0.1, -0.5, upDownMovement(0.2, 0.6, 0.01, &moveDirection, &lastValue), colors[KNIFE][R], colors[KNIFE][G], colors[KNIFE][B]);
 }
 
 void DrawBoardCarrotCutKnife(void)
@@ -709,6 +680,8 @@ void DrawBoardMeatCutKnife(void)
 void DrawPotWaterOnStove(void)
 {
 	// Draw stove
+	DrawStove();
+	/*
 	glLoadIdentity;
 	glPushMatrix();					//Nullpunkt Weltkoord
 	//glTranslatef(0.0, 0.0, 0.0);
@@ -732,8 +705,13 @@ void DrawPotWaterOnStove(void)
 	glColor3f(colors[STOVE_DOOR][R], colors[STOVE_DOOR][G], colors[STOVE_DOOR][B]);
 	recursive_render(stoveDoor.scene, stoveDoor.scene->mRootNode);	//render Model
 	glPopMatrix();					// Restore world coordinate system.
-
+	*/
+	
 	//Draw pot with water on stove
+	/*
+	draw(&pot, 1.0, 1.0, 1.0, 0, 0, 3.4, colors[POT][R], colors[POT][G], colors[POT][B]);
+	draw(&potWater, 0.8, 0.8, 0.8, 0, 0, 3.4, colors[POTWATER][R], colors[POTWATER][G], colors[POTWATER][B]);
+	*/
 	glLoadIdentity;
 	glPushMatrix();					//Nullpunkt Weltkoord
 	scale_center_model(pot, 1.0, 1.0, 1.0);
@@ -741,16 +719,16 @@ void DrawPotWaterOnStove(void)
 	glScalef(0.65, 0.65, 0.65);
 	glColor3f(colors[POT][R], colors[POT][G], colors[POT][B]);
 	recursive_render(pot.scene, pot.scene->mRootNode);	//render Model
-
 	glColor3f(colors[POTWATER][R], colors[POTWATER][G], colors[POTWATER][B]);
 	recursive_render(potWater.scene, potWater.scene->mRootNode);	//render Model
 	glPopMatrix();					// Restore world coordinate system.
-
 }
 
 void DrawPotWaterInSink(void)
 {
 	// Draw sink
+	DrawSink();
+	/*
 	glLoadIdentity;
 	glPushMatrix();					//Nullpunkt Weltkoord
 	//glTranslatef(0.0, 0.0, 0.0);
@@ -774,8 +752,9 @@ void DrawPotWaterInSink(void)
 	glColor3f(colors[SINK_FAUCET][R], colors[SINK_FAUCET][G], colors[SINK_FAUCET][B]);
 	recursive_render(sinkFaucet.scene, sinkFaucet.scene->mRootNode);	//render Model
 	glPopMatrix();					// Restore world coordinate system.
+	*/
 
-	//Draw pot with water on stove
+	//Draw pot with water in sink
 	glLoadIdentity;
 	glPushMatrix();					//Nullpunkt Weltkoord
 	scale_center_model(pot, 1.0, 1.0, 1.0);
@@ -787,7 +766,6 @@ void DrawPotWaterInSink(void)
 	glColor3f(colors[POTWATER][R], colors[POTWATER][G], colors[POTWATER][B]);
 	recursive_render(potWater.scene, potWater.scene->mRootNode);	//render Model
 	glPopMatrix();					// Restore world coordinate system.
-
 }
 
 void DrawWashFood(void)
@@ -795,14 +773,7 @@ void DrawWashFood(void)
 	DrawSink();
 
 	//chopping board
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	scale_center_model(board, 1.0, 1.0, 1.0);
-	glTranslatef(110.0, 0.0, 340.0);
-	glScalef(1.0, 1.0, 1.0);
-	glColor3f(colors[BOARD][R], colors[BOARD][G], colors[BOARD][B]);
-	recursive_render(board.scene, board.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
+	draw(&board, 1.0, 1.0, 1.0, 0.6, 0.0, 2.2, colors[BOARD][R], colors[BOARD][G], colors[BOARD][B]);
 
 	//carrot
 	glLoadIdentity;
@@ -832,6 +803,8 @@ void DrawWashFood(void)
 void DrawSoupDone(void)
 {
 	// Draw stove
+	DrawStove();
+	/*
 	glLoadIdentity;
 	glPushMatrix();					//Nullpunkt Weltkoord
 	//glTranslatef(0.0, 0.0, 0.0);
@@ -855,7 +828,7 @@ void DrawSoupDone(void)
 	glColor3f(colors[STOVE_DOOR][R], colors[STOVE_DOOR][G], colors[STOVE_DOOR][B]);
 	recursive_render(stoveDoor.scene, stoveDoor.scene->mRootNode);	//render Model
 	glPopMatrix();					// Restore world coordinate system.
-
+	*/ 
 	//Draw pot with water on stove
 	glLoadIdentity;
 	glPushMatrix();					//Nullpunkt Weltkoord
@@ -864,11 +837,9 @@ void DrawSoupDone(void)
 	glScalef(0.65, 0.65, 0.65);
 	glColor3f(colors[POT][R], colors[POT][G], colors[POT][B]);
 	recursive_render(pot.scene, pot.scene->mRootNode);	//render Model
-
 	glColor3f(colors[SOUP][R], colors[SOUP][G], colors[SOUP][B]);
 	recursive_render(potWater.scene, potWater.scene->mRootNode);	//render Model
 	glPopMatrix();					// Restore world coordinate system.
-
 }
 
 void DrawFoodInPot(int state)
@@ -893,11 +864,9 @@ void DrawFoodInPot(int state)
 	glScalef(0.65, 0.65, 0.65);
 	glColor3f(colors[POT][R], colors[POT][G], colors[POT][B]);
 	recursive_render(pot.scene, pot.scene->mRootNode);	//render Model
-
 	glColor3f(colors[POTWATER][R], colors[POTWATER][G], colors[POTWATER][B]);
 	recursive_render(potWater.scene, potWater.scene->mRootNode);	//render Model
-	glPopMatrix();  					// Restore world coordinate system.
-
+	glPopMatrix();					// Restore world coordinate system.
 
 	if (turning)
 	{
@@ -1181,6 +1150,7 @@ void DrawMeatInPot(void)
 */
 void DrawServeFood(void)
 {
+	glTranslatef(0, 0.3, 0);
 	glScalef(0.8, 0.8, 0.8);
 	//draw table
 	draw(&table, 5.0, 5.0, 5.0, 0, 0, 0, colors[TABLE][R], colors[TABLE][G], colors[TABLE][B]);
@@ -1219,8 +1189,8 @@ void drawText(const char* text, int length, int x, int y) // funtion to draw tex
 	glOrtho(0, 800, 0, 600, -5, 5);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+	glColor3f(1, 0, 0);
 	glRasterPos2i(x, y);
-
 	for (int i = 0; i < length; i++) // loop to put out text
 
 	{
@@ -1242,9 +1212,6 @@ void drawText(const char* text, int length, int x, int y) // funtion to draw tex
 	glMatrixMode(GL_PROJECTION);
 	glLoadMatrixd(matrix);
 	glMatrixMode(GL_MODELVIEW);
-
-
-
 }
 
 static void releaseModels()
