@@ -78,24 +78,18 @@ void onMouseButton(int button, int state_mouse, int x, int y) //--------------- 
 
 
 		if (button == GLUT_LEFT_BUTTON) // check mouse state
-
-		{
-			state--;				// last state
-		}
+			if (state > 0)
+				state--;				// last state
 
 		if (button == GLUT_MIDDLE_BUTTON)
-
-		{
-			  Quit();		// quit app
-		}
+			Quit();		// quit app
 
 		if (button == GLUT_RIGHT_BUTTON)
-
 		{
-			state++;				// next state			
+			if (state < 15)
+				state++;				// next state
 		}
 	}
-
 }
 
 
@@ -150,16 +144,14 @@ void Keyboard(unsigned char key, int x, int y) // Keyboard handler
 		break;
 	case 'W':
 	case 'w':	// zum nächsten Anleitungsstate springen
-		state++;
-
+		if (state < 15)
+			state++;
 		break;
 	case 'S':
 	case 's': 	// zum vorherigen Anleitungsstate springen
-		state--;
-		if (state < 0)
-			state++;
+		if (state > 0)
+			state--;
 		break;
-
 	default:
 		break;
 	}
