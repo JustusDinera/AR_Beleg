@@ -1,31 +1,15 @@
 #ifndef AR_CONTENT_H
 #define AR_CONTENT_H
 
-
-#include <GL/glut.h>
-#include <iostream>
-#include <windows.h>
-#include <stdio.h>
-#include <stdlib.h>							// malloc(), free()
-#include <math.h>
-#include "ar_tracker.h"
-//#include "finite_state_machine.h"
-#include "user_interface.h"
-
-// ----- GL lips ------------------
-#include <GL/freeglut.h>
-
-//------- ARToolkit lips ----------
-#include <AR/gsub_lite.h>
-
 //------- assimp lips ----------
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
 // ============================================================================
-//	Global definitions
+//	Global declarations
 // ============================================================================
+
 enum eColor {
 	KNIFE, BOARD, POT, POTWATER, SOUP, LID, FISH, FISHCUT, CARROT, MEAT, LEEK_GREEN, LEEK_WHITE, SINK, SINK_DOOR, SINK_FAUCET, STOVE, STOVE_BLACK, STOVE_DOOR, TABLE, BOWL_LOWER, BOWL_UPPER, BOWL_INNER, SPOON, LAST_VALUE
 };
@@ -57,25 +41,22 @@ public:
 	C_STRUCT aiVector3D scene_min, scene_max, scene_center;
 };
 
-MODEL::MODEL(char* path_model)
-{
-	//scene = NULL;
-	scene_list = 0;
+// --------- precompiler declarations
 
-	// Load the model file.
-	scene = aiImportFile(path_model, aiProcessPreset_TargetRealtime_MaxQuality);
+#define aisgl_min(x,y) (x<y?x:y)
+#define aisgl_max(x,y) (y>x?y:x)
 
-	if (0 != loadasset(&this->scene_min, &this->scene_max, this->scene, &this->scene_center)) {
-		printf_s("Failed to load model. Please ensure that the specified file exists.");
-	}
+//----------- Global variables
 
-}
+GLfloat xmove_1, ymove_1, zmove_1 = 0;		//Pfeilmotion Translatef-Parameter fÃ¼r state ==1
+GLfloat xmove_2, ymove_2, zmove_2 = 0;		//Pfeilmotion Translatef-Parameter fÃ¼r state ==2
 
-MODEL::~MODEL()
-{
-}
+GLfloat crossmotion = 0;						//Drehparameter des Kreuzes
 
-// the global Assimp scene 
+// deinition of coordinates
+enum coord { X, Y, Z };
+
+//-------- the global Assimp scene -----------
 MODEL knife("../Models/knife.stl");
 MODEL board("../Models/board.stl");
 MODEL pot("../Models/pot.stl");
@@ -101,10 +82,12 @@ MODEL stoveBlack("../Models/stoveBlack.stl");
 MODEL stoveDoor("../Models/stoveDoor.stl");
 
 MODEL table("../Models/table.stl");
+
 MODEL bowlLower("../Models/bowlLower.stl");
 MODEL bowlUpper("../Models/bowlUpper.stl");
 MODEL bowlInner("../Models/bowlInner.stl");
 MODEL spoon("../Models/spoon.stl");
+
 
 GLfloat colors[LAST_VALUE][3] =
 {
@@ -133,12 +116,95 @@ GLfloat colors[LAST_VALUE][3] =
 	{0.752, 0.752, 0.752}  //SPOON
 };
 
+extern int state;	//extern definition of the variable
+
+//-------- For use in drawing --------------
+static float gDrawRotateAngle = 0;			
+static int	 gDrawRotate = FALSE;
+
+//----------- Global functions ---------------
+
+int loadasset(aiVector3D* scene_min, aiVector3D* scene_max, const C_STRUCT aiScene* scene, aiVector3D* scene_center);
+void get_bounding_box_for_node(const C_STRUCT aiNode* nd,
+	C_STRUCT aiVector3D* min,
+	C_STRUCT aiVector3D* max,
+	C_STRUCT aiMatrix4x4* trafo,
+	const aiScene* scene);
+
+	void get_bounding_box(C_STRUCT aiVector3D* min, C_STRUCT aiVector3D* max, const aiScene* C_STRUCT scene);
+
+int loadasset(aiVector3D* scene_min, aiVector3D* scene_max, const C_STRUCT aiScene* scene, aiVector3D* scene_center);
+
+void get_bounding_box_for_node(
+	const C_STRUCT aiNode* nd,
+	C_STRUCT aiVector3D* min,
+	C_STRUCT aiVector3D* max,
+	C_STRUCT aiMatrix4x4* trafo,
+	const aiScene* scene);
+
+void get_bounding_box(C_STRUCT aiVector3D* min, C_STRUCT aiVector3D* max, const aiScene* C_STRUCT scene);
+
+void scale_center_model(MODEL model, ai_real x, ai_real y, ai_real z);
+
+void color4_to_float4(const C_STRUCT aiColor4D* c, float f[4]);
+
+void set_float4(float f[4], float a, float b, float c, float d);
+
+void apply_material(const C_STRUCT aiMaterial* mtl);
+
+void recursive_render(const C_STRUCT aiScene* sc, const C_STRUCT aiNode* nd);
+
+void drawText(const char *text, int length, int x, int y); // funtion to draw text
+
+void DrawSink(void);
+
+void DrawStove(void);
+
+void DrawBoardFishCutKnife(void);
+
+void DrawBoardCarrotCutKnife(void);
+
+void DrawBoardLeekCutKnife(void);
+
+void DrawPotWaterOnStove(void);
+
+void DrawPotWaterInSink(void);
+
+void DrawWashFood(void);
+
+void DrawSoupDone(void);
+
+void DrawServeFood(void);
+
+
+// ============================================================================
+//	Global definitions
+// ============================================================================
+
+MODEL::MODEL(char* path_model)
+{
+	//scene = NULL;
+	scene_list = 0;
+
+	// Load the model file.
+	scene = aiImportFile(path_model, aiProcessPreset_TargetRealtime_MaxQuality);
+
+	if (0 != loadasset(&this->scene_min, &this->scene_max, this->scene, &this->scene_center)) {
+		printf_s("Failed to load model. Please ensure that the specified file exists.");
+	}
+}
+
+MODEL::~MODEL()
+{
+	// free space to avoid ressource leakage (assimp)
+	//aiReleaseImport(this->scene);
+}
+
 // load the model to the scene
 int loadasset(aiVector3D* scene_min, aiVector3D* scene_max, const C_STRUCT aiScene* scene, aiVector3D* scene_center)
 {
 	/* we are taking one of the postprocessing presets to avoid
 	   spelling out 20+ single postprocessing flags here. */
-
 	if (scene) {
 		get_bounding_box(scene_min, scene_max, scene);
 		scene_center->x = (scene_min->x + scene_max->x) / 2.0f;
@@ -148,9 +214,6 @@ int loadasset(aiVector3D* scene_min, aiVector3D* scene_max, const C_STRUCT aiSce
 	}
 	return 1;
 }
-
-#define aisgl_min(x,y) (x<y?x:y)
-#define aisgl_max(x,y) (y>x?y:x)
 
 // set the bounds of the node of the model
 void get_bounding_box_for_node(const C_STRUCT aiNode* nd,
@@ -168,7 +231,6 @@ void get_bounding_box_for_node(const C_STRUCT aiNode* nd,
 	for (; n < nd->mNumMeshes; ++n) {
 		const C_STRUCT aiMesh* mesh = scene->mMeshes[nd->mMeshes[n]];
 		for (t = 0; t < mesh->mNumVertices; ++t) {
-
 			C_STRUCT aiVector3D tmp = mesh->mVertices[t];
 			aiTransformVecByMatrix4(&tmp, trafo);
 
@@ -209,7 +271,6 @@ void scale_center_model(MODEL model, ai_real x, ai_real y, ai_real z) {
 
 	// center the model 
 	glTranslatef(-model.scene_center.x + x, -model.scene_center.y + y, -model.scene_center.z + z);
-
 }
 
 // convert a color array to a float array
@@ -229,7 +290,6 @@ void set_float4(float f[4], float a, float b, float c, float d)
 	f[2] = c;
 	f[3] = d;
 }
-
 
 // set the surface of the models
 void apply_material(const C_STRUCT aiMaterial* mtl)
@@ -358,58 +418,7 @@ void recursive_render(const C_STRUCT aiScene* sc, const C_STRUCT aiNode* nd)
 	glPopMatrix();
 }
 
-void DrawArrow(static short direction);					// Funktionierender Pfeil, ausgerichtet, mit Motion
-
-void ArrowMotion(float timeDelta);						// Updates the motion of the arrow
-
-void DrawTeapot(void);									// Draws the Teapot
-
-void DrawCheck(void);									//Draw Check
-
-void DrawCross(void);									//Draw cross
-
-void CrossMotion(float timeDelta);						// update the motion parameters of the cross
-
-void drawText(const char *text, int length, int x, int y); // funtion to draw text
-
-void DrawSink(void);
-
-void DrawStove(void);
-
-void DrawBoardFishCutKnife(void);
-
-void DrawBoardCarrotCutKnife(void);
-
-void DrawBoardLeekCutKnife(void);
-
-void DrawBoardCarrotFishLeek(void);
-
-void DrawPotWaterOnStove(void);
-
-void DrawPotWaterInSink(void);
-
-void DrawWashFood(void);
-
-void DrawSoupDone(void);
-
-void DrawFoodInStove(void);
-
-void DrawServeFood(void);
-
-
-//----------- Global variables
-
-GLfloat xmove_1, ymove_1, zmove_1 = 0;		//Pfeilmotion Translatef-Parameter für state ==1
-GLfloat xmove_2, ymove_2, zmove_2 = 0;		//Pfeilmotion Translatef-Parameter für state ==2
-
-GLfloat crossmotion = 0;						//Drehparameter des Kreuzes
-
-extern int state;	// extern definition of the variable
-
 //----------- Drawing --------------------------
-
-static float gDrawRotateAngle = 0;			// For use in drawing.
-static int	 gDrawRotate = FALSE;
 
 //Draw model and scale to scene; model - scale - translate - color
 void draw(
@@ -473,7 +482,71 @@ GLfloat upDownMovement(GLfloat min, GLfloat max, GLfloat stepSize, int* move, GL
 	}
 }
 
+GLfloat transMovment(GLfloat min, GLfloat max, GLfloat stepSize, int* move, GLfloat* oldValue) {
+	//static int state = 0; // 0 = up; 1 = down
+	//static GLfloat prevValue = 0;
+	static unsigned int prevTime = 0;
+	unsigned int msTime;
+	GLfloat absoluteValue = max - min;
+
+	msTime = glutGet(GLUT_ELAPSED_TIME);
+
+	if (prevTime == 0)
+	{
+		prevTime = msTime;
+	}
+
+	if (msTime - prevTime > 20)
+	{
+		*oldValue += stepSize;
+		prevTime = msTime;
+
+	}
+
+	if (absoluteValue < 0)
+	{
+		absoluteValue = absoluteValue * -1;
+	}
+
+	if (absoluteValue < *oldValue)
+	{
+		if (*move)
+			*move = 0;
+		else
+			*move = 1;
+
+		*oldValue = 0;
+	}
+
+	if (*move)
+	{
+		return (max - *oldValue);
+	}
+	else
+	{
+		return (min + *oldValue);
+	}
+}
+
+
+static int moveDirection = 0;
+static GLfloat lastValue = 0;
+
 //****** models and scenes ******//
+
+	//COLOR VALUES FOR MODELS
+	/*
+	Model	color	R,G,B
+	pot		grey	0.662, 0.662, 0.662
+	carrot	orange	0.929, 0.568, 0.129
+	knife	silver	0.831, 0.847, 0.945
+	board	brown	0.482, 0.192, 0.058
+	fish	pink	0.349, 0.529, 0.486
+	meat	pink	0.988, 0.337, 0.337
+	water	blue	0.447, 0.807, 0.952
+	leek	green	0, 0.564, 0.352
+	leek	white	0.901, 0.917, 0.905
+	*/
 
 void DrawSink(void)
 {
@@ -486,7 +559,6 @@ void DrawSink(void)
 	// ***Sink***
 	glLoadIdentity;
 	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
 	glScalef(0.03, 0.03, 0.03);
 	glColor3f(colors[SINK][R], colors[SINK][G], colors[SINK][B]);
 	recursive_render(sink.scene, sink.scene->mRootNode);	//render Model
@@ -494,7 +566,6 @@ void DrawSink(void)
 
 	glLoadIdentity;
 	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
 	glScalef(0.03, 0.03, 0.03);
 	glColor3f(colors[SINK_DOOR][R], colors[SINK_DOOR][R], colors[SINK_DOOR][R]);
 	recursive_render(sinkDoor.scene, sinkDoor.scene->mRootNode);	//render Model
@@ -502,12 +573,10 @@ void DrawSink(void)
 
 	glLoadIdentity;
 	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
 	glScalef(0.03, 0.03, 0.03);
 	glColor3f(colors[SINK_FAUCET][R], colors[SINK_FAUCET][G], colors[SINK_FAUCET][B]);
 	recursive_render(sinkFaucet.scene, sinkFaucet.scene->mRootNode);	//render Model
 	glPopMatrix();					// Restore world coordinate system.
-	*/
 
 }
 
@@ -522,7 +591,6 @@ void DrawStove(void)
 	// ***stove***
 	glLoadIdentity;
 	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
 	glScalef(0.03, 0.03, 0.03);
 	glColor3f(colors[STOVE][R], colors[STOVE][G], colors[STOVE][B]);
 	recursive_render(stove.scene, stove.scene->mRootNode);	//render Model
@@ -530,7 +598,6 @@ void DrawStove(void)
 
 	glLoadIdentity;
 	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
 	glScalef(0.03, 0.03, 0.03);
 	glColor3f(colors[STOVE_BLACK][R], colors[STOVE_BLACK][G], colors[STOVE_BLACK][B]);
 	recursive_render(stoveBlack.scene, stoveBlack.scene->mRootNode);	//render Model
@@ -538,12 +605,72 @@ void DrawStove(void)
 
 	glLoadIdentity;
 	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
 	glScalef(0.03, 0.03, 0.03);
 	glColor3f(colors[STOVE_DOOR][R], colors[STOVE_DOOR][G], colors[STOVE_DOOR][B]);
 	recursive_render(stoveDoor.scene, stoveDoor.scene->mRootNode);	//render Model
 	glPopMatrix();					// Restore world coordinate system.
-	*/
+
+}
+
+void DrawBoardCarrotLeek(void)
+{
+	static int moveDirection = 0;
+	static GLfloat lastValue = 0;
+	// ***load board, carrot, fish***
+	//chopping board
+	draw(&board, 2, 2, 2, 0.0, 0.0, 0.0, 0.482, 0.192, 0.058);
+
+	//carrot
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	scale_center_model(carrot, 1.0, 1.0, 1.0);
+	glScalef(1.5, 1.0, 1.0);
+	glTranslatef(0.0, -20.0, 10.0);
+	glColor3f(0.929, 0.568, 0.129);
+	recursive_render(carrot.scene, carrot.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+
+	//leek
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	//scale_center_model(fish, 1.0, 1.0, 1.0);
+	glTranslatef(-0.1, 0.2, 0.2);
+	glScalef(0.025, 0.015, 0.015);
+	glColor3f(0, 0.564, 0.352);
+	recursive_render(leekGreen.scene, leekGreen.scene->mRootNode);	//render Model
+	glColor3f(0.901, 0.917, 0.905);
+	recursive_render(leekWhite.scene, leekWhite.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+}
+
+void DrawBoardFishMeat(void)
+{
+	static int moveDirection = 0;
+	static GLfloat lastValue = 0;
+	// ***load board, carrot, fish***
+	//chopping board
+	draw(&board, 2, 2, 2, 0.0, 0.0, 0.0, 0.482, 0.192, 0.058);
+
+	//meat
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	scale_center_model(meat, 1.0, 1.0, 1.0);
+	glScalef(1.0, 1.0, 1.0);
+	glTranslatef(0, -20.0, 8.0);
+	glColor3f(0.988, 0.337, 0.337);
+	recursive_render(meat.scene, meat.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+
+	//fish
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+	scale_center_model(fish, 1.0, 1.0, 1.0);
+	glScalef(1.5, 1.0, 1.0);
+	glTranslatef(-0.6, -0.6, -0.85);
+	glColor3f(0.349, 0.529, 0.486);
+	recursive_render(fish.scene, fish.scene->mRootNode);	//render Model
+	glPopMatrix();					// Restore world coordinate system.
+
 }
 
 void DrawBoardFishCutKnife(void)
@@ -574,21 +701,14 @@ void DrawBoardFishCutKnife(void)
 	glPopMatrix();					// Restore world coordinate system.
 
 	//knife
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	scale_center_model(knife, 1.0, 1.0, 1.0);
-	glTranslatef(-0.8, -80.0, upDownMovement(0.2, 0.6, 0.01, &moveDirection, &lastValue));
-	glColor3f(colors[KNIFE][R], colors[KNIFE][G], colors[KNIFE][B]);
-	recursive_render(knife.scene, knife.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
-	*/
+
+	draw(&knife, 1.2, 1.2, 1.2, -0.1, -0.5, upDownMovement(0.2, 0.6, 0.01, &moveDirection, &lastValue), 0.831, 0.847, 0.945);
+
 
 }
 
 void DrawBoardCarrotCutKnife(void)
 {
-	static int moveDirection = 0;
-	static GLfloat lastValue = 0;
 	// ***board, cut carrot, knife***
 
 	draw(&board, 2, 2, 2, 0, 0, 0, colors[BOARD][R], colors[BOARD][G], colors[BOARD][B]);
@@ -624,8 +744,9 @@ void DrawBoardLeekCutKnife(void)
 	draw(&knife, 1.2, 1.2, 1.2, -0.1, -0.5, upDownMovement(0.2, 0.6, 0.01, &moveDirection, &lastValue), colors[KNIFE][R], colors[KNIFE][G], colors[KNIFE][B]);
 }
 
-void DrawBoardCarrotFishLeek(void)
+void DrawBoardMeatCutKnife(void)
 {
+/*
 	static int moveDirection = 0;
 	static GLfloat lastValue = 0;
 	// ***load board, carrot, fish***
@@ -664,7 +785,17 @@ void DrawBoardCarrotFishLeek(void)
 	glColor3f(colors[FISH][R], colors[FISH][G], colors[FISH][B]);
 	recursive_render(fish.scene, fish.scene->mRootNode);	//render Model
 	glPopMatrix();					// Restore world coordinate system.
+*/
+	// ***board, cut fish, knife***
+	//board
+	draw(&board, 2, 2, 2, 0, 0, 0, 0.482, 0.192, 0.058);
 
+	//meat
+	draw(&meatCut, 1, 1, 1, 0, -0.2, 0.15, 0.988, 0.337, 0.337);
+
+
+	//knife
+	draw(&knife, 1.2, 1.2, 1.2, -0.1, -0.5, upDownMovement(0.2, 0.6, 0.01, &moveDirection, &lastValue), 0.831, 0.847, 0.945);
 }
 
 
@@ -704,8 +835,11 @@ void DrawPotWaterOnStove(void)
 	glPushMatrix();					//Nullpunkt Weltkoord
 	scale_center_model(pot, 1.0, 1.0, 1.0);
 	glTranslatef(45, -10.0, 372.0);
-	glScalef(0.5, 0.5, 0.5);
+  glScalef(0.65, 0.65, 0.65);
 	glColor3f(colors[POT][R], colors[POT][G], colors[POT][B]);
+
+
+
 	recursive_render(pot.scene, pot.scene->mRootNode);	//render Model
 
 	glColor3f(colors[POTWATER][R], colors[POTWATER][G], colors[POTWATER][B]);
@@ -856,8 +990,9 @@ void DrawSoupDone(void)
 	glPushMatrix();					//Nullpunkt Weltkoord
 	scale_center_model(pot, 1.0, 1.0, 1.0);
 	glTranslatef(45, -10.0, 372.0);
-	glScalef(0.5, 0.5, 0.5);
+	glScalef(0.65, 0.65, 0.65);
 	glColor3f(colors[POT][R], colors[POT][G], colors[POT][B]);
+
 	recursive_render(pot.scene, pot.scene->mRootNode);	//render Model
 
 	glColor3f(colors[SOUP][R], colors[SOUP][G], colors[SOUP][B]);
@@ -866,48 +1001,307 @@ void DrawSoupDone(void)
 
 }
 
-void DrawFoodInStove(void)
+void DrawCarrotInPot(void)
 {
-	/*
-	// Draw stove
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
-	glScalef(0.03, 0.03, 0.03);
-	glColor3f(1.0, 1.0, 1.0);
-	recursive_render(stove.scene, stove.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
+
+	// leek position
+	GLfloat start[] = { 0.6, 0.05, 4 };
+	GLfloat endZ = 1.5;
+	GLfloat angle[] = { 90,0,90 };
+	GLfloat static oldValue = 0;
+	int direction = 1;
+	int static turning = 1;
+	GLfloat static rotated[3] = { 0,0,0 };
+	GLfloat stepWidth = 0.05;
+
+	DrawStove();
+
+	//Draw pot with water on stove
 
 	glLoadIdentity;
 	glPushMatrix();					//Nullpunkt Weltkoord
-	//glTranslatef(0.0, 0.0, 0.0);
-	glScalef(0.03, 0.03, 0.03);
-	glColor3f(0.0, 0.0, 0.0);
-	recursive_render(stoveBlack.scene, stoveBlack.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
+	scale_center_model(pot, 1.0, 1.0, 1.0);
+	glTranslatef(45, -10.0, 372.0);
+	glScalef(0.65, 0.65, 0.65);
+	glColor3f(0.662, 0.662, 0.662);
+	recursive_render(pot.scene, pot.scene->mRootNode);	//render Model
 
+	glColor3f(0.447, 0.807, 0.952);
+	recursive_render(potWater.scene, potWater.scene->mRootNode);	//render Model
+	glPopMatrix();  					// Restore world coordinate system.
+
+
+	if (turning)
+	{
+		glTranslatef(start[X], start[Y], start[Z]); // translate over the stove
+
+		if (rotated[X] < angle[X])
+		{
+			rotated[X]++;
+		}
+		if (rotated[Y] < angle[Y])
+		{
+			rotated[Y]++;
+		}
+		if (rotated[Z] < angle[Z])
+		{
+			rotated[Z]++;
+		}
+		glRotatef(rotated[X], 1, 0, 0);
+		glRotatef(rotated[Y], 0, 1, 0);
+		glRotatef(rotated[Z], 0, 0, 1);
+
+		if (rotated[X] >= angle[X] && rotated[Y] >= angle[Y] && rotated[Z] >= angle[Z])
+		{
+			turning = 0;
+			rotated[X] = 0;
+			rotated[Y] = 0;
+			rotated[Z] = 0;
+		}
+	}
+	else
+	{
+		glTranslatef(start[X], start[Y], transMovment(endZ, start[Z], stepWidth, &direction, &oldValue)); // translate over the stove
+		glRotatef(angle[X], 1, 0, 0);
+		glRotatef(angle[Y], 1, 1, 0);
+		glRotatef(angle[Z], 0, 0, 1);
+
+		if (oldValue >= start[Z] - endZ - stepWidth)
+		{
+			turning = 1;
+		}
+	}
+
+	//Draw carrot
+	draw(&carrotCut, 0.3, 0.3, 0.3, 0.3, 0.3, 0.4, 0.929, 0.568, 0.129);
+}
+
+void DrawLeekdInPot(void)
+{
+	// leek position
+	GLfloat start[] = { 0.6, 0.05, 4 };
+	GLfloat endZ = 1.5;
+	GLfloat angle[] = { 90,0,90 };
+	GLfloat static oldValue = 0;
+	int direction = 1;
+	int static turning = 1;
+	GLfloat static rotated[3] = { 0,0,0 };
+	GLfloat stepWidth = 0.05;
+
+	DrawStove();
+
+	//Draw pot with water on stove
 	glLoadIdentity;
 	glPushMatrix();					//Nullpunkt Weltkoord
+	scale_center_model(pot, 1.0, 1.0, 1.0);
+	glTranslatef(45, -10.0, 372.0);
+	glScalef(0.65, 0.65, 0.65);
+	glColor3f(0.662, 0.662, 0.662);
+	recursive_render(pot.scene, pot.scene->mRootNode);	//render Model
+
+	glColor3f(0.447, 0.807, 0.952);
+	recursive_render(potWater.scene, potWater.scene->mRootNode);	//render Model
+	glPopMatrix();  					// Restore world coordinate system.
+
+
+	if (turning)
+	{
+		glTranslatef(start[X], start[Y], start[Z]); // translate over the stove
+
+		if (rotated[X] < angle[X])
+		{
+			rotated[X]++;
+		}
+		if (rotated[Y] < angle[Y])
+		{
+			rotated[Y]++;
+		}
+		if (rotated[Z] < angle[Z])
+		{
+			rotated[Z]++;
+		}
+		glRotatef(rotated[X], 1, 0, 0);
+		glRotatef(rotated[Y], 0, 1, 0);
+		glRotatef(rotated[Z], 0, 0, 1);
+
+		if (rotated[X] >= angle[X] && rotated[Y] >= angle[Y] && rotated[Z] >= angle[Z])
+		{
+			turning = 0;
+			rotated[X] = 0;
+			rotated[Y] = 0;
+			rotated[Z] = 0;
+		}
+	}
+	else
+	{
+		glTranslatef(start[X], start[Y], transMovment(endZ, start[Z], stepWidth, &direction, &oldValue)); // translate over the stove
+		glRotatef(angle[X], 1, 0, 0);
+		glRotatef(angle[Y], 1, 1, 0);
+		glRotatef(angle[Z], 0, 0, 1);
+
+		if (oldValue >= start[Z] - endZ - stepWidth)
+		{
+			turning = 1;
+		}
+	}
+
+	//glPushMatrix();
+	//Draw Leek
+	draw(&leekGreenCut, 0.2, 0.2, 0.2, 0.2, 0.3, 0.1, 0, 0.564, 0.352);
+	draw(&leekWhiteCut, 0.3, 0.3, 0.3, 1.5, 0.2, 0.1, 0.901, 0.917, 0.905);
+}
+
+void DrawFishInPot(void)
+{
+	// leek position
+	GLfloat start[] = { 0.6, 0.05, 4 };
+	GLfloat endZ = 1.5;
+	GLfloat angle[] = { 90,0,90 };
+	GLfloat static oldValue = 0;
+	int direction = 1;
+	int static turning = 1;
+	GLfloat static rotated[3] = { 0,0,0 };
+	GLfloat stepWidth = 0.05;
+
+	DrawStove();
+
+	//Draw pot with water on stove
+	glLoadIdentity;
+	glPushMatrix();					//Nullpunkt Weltkoord
+/*
 	//glTranslatef(0.0, 0.0, 0.0);
 	glScalef(0.03, 0.03, 0.03);
 	glColor3f(1.0, 1.0, 0.0);
 	recursive_render(stoveDoor.scene, stoveDoor.scene->mRootNode);	//render Model
 	glPopMatrix();					// Restore world coordinate system.
 	*/
+	scale_center_model(pot, 1.0, 1.0, 1.0);
+	glTranslatef(45, -10.0, 372.0);
+	glScalef(0.65, 0.65, 0.65);
+	glColor3f(0.662, 0.662, 0.662);
+	recursive_render(pot.scene, pot.scene->mRootNode);	//render Model
+
+	glColor3f(0.447, 0.807, 0.952);
+	recursive_render(potWater.scene, potWater.scene->mRootNode);	//render Model
+	glPopMatrix();  					// Restore world coordinate system.
+
+
+	if (turning)
+	{
+		glTranslatef(start[X], start[Y], start[Z]); // translate over the stove
+
+		if (rotated[X] < angle[X])
+		{
+			rotated[X]++;
+		}
+		if (rotated[Y] < angle[Y])
+		{
+			rotated[Y]++;
+		}
+		if (rotated[Z] < angle[Z])
+		{
+			rotated[Z]++;
+		}
+		glRotatef(rotated[X], 1, 0, 0);
+		glRotatef(rotated[Y], 0, 1, 0);
+		glRotatef(rotated[Z], 0, 0, 1);
+
+		if (rotated[X] >= angle[X] && rotated[Y] >= angle[Y] && rotated[Z] >= angle[Z])
+		{
+			turning = 0;
+			rotated[X] = 0;
+			rotated[Y] = 0;
+			rotated[Z] = 0;
+		}
+	}
+	else
+	{
+		glTranslatef(start[X], start[Y], transMovment(endZ, start[Z], stepWidth, &direction, &oldValue)); // translate over the stove
+		glRotatef(angle[X], 1, 0, 0);
+		glRotatef(angle[Y], 1, 1, 0);
+		glRotatef(angle[Z], 0, 0, 1);
+
+		if (oldValue >= start[Z] - endZ - stepWidth)
+		{
+			turning = 1;
+		}
+	}
+	// Draw fish
+	draw(&fishCut, 0.8, 0.8, 0.8, -0.5, -1, -0.8, 0.349, 0.529, 0.486);
+	//glPopMatrix();
+}
+
+void DrawMeatInPot(void)
+{
+	// leek position
+	GLfloat start[] = { 0.6, 0.05, 4 };
+	GLfloat endZ = 1.5;
+	GLfloat angle[] = { 90,0,90 };
+	GLfloat static oldValue = 0;
+	int direction = 1;
+	int static turning = 1;
+	GLfloat static rotated[3] = { 0,0,0 };
+	GLfloat stepWidth = 0.05;
 
 	DrawStove();
+
 	//Draw pot with water on stove
 	glLoadIdentity;
 	glPushMatrix();					//Nullpunkt Weltkoord
 	scale_center_model(pot, 1.0, 1.0, 1.0);
 	glTranslatef(45, -10.0, 372.0);
-	glScalef(0.5, 0.5, 0.5);
+	glScalef(0.65, 0.65, 0.65);
 	glColor3f(colors[POT][R], colors[POT][G], colors[POT][B]);
 	recursive_render(pot.scene, pot.scene->mRootNode);	//render Model
 
 	glColor3f(colors[POTWATER][R], colors[POTWATER][G], colors[POTWATER][B]);
 	recursive_render(potWater.scene, potWater.scene->mRootNode);	//render Model
-	glPopMatrix();					// Restore world coordinate system.
+	glPopMatrix();  					// Restore world coordinate system.
+
+
+	if (turning)
+	{
+		glTranslatef(start[X], start[Y], start[Z]); // translate over the stove
+
+		if (rotated[X] < angle[X])
+		{
+			rotated[X]++;
+		}
+		if (rotated[Y] < angle[Y])
+		{
+			rotated[Y]++;
+		}
+		if (rotated[Z] < angle[Z])
+		{
+			rotated[Z]++;
+		}
+		glRotatef(rotated[X], 1, 0, 0);
+		glRotatef(rotated[Y], 0, 1, 0);
+		glRotatef(rotated[Z], 0, 0, 1);
+
+		if (rotated[X] >= angle[X] && rotated[Y] >= angle[Y] && rotated[Z] >= angle[Z])
+		{
+			turning = 0;
+			rotated[X] = 0;
+			rotated[Y] = 0;
+			rotated[Z] = 0;
+		}
+	}
+	else
+	{
+		glTranslatef(start[X], start[Y], transMovment(endZ, start[Z], stepWidth, &direction, &oldValue)); // translate over the stove
+		glRotatef(angle[X], 1, 0, 0);
+		glRotatef(angle[Y], 1, 1, 0);
+		glRotatef(angle[Z], 0, 0, 1);
+
+		if (oldValue >= start[Z] - endZ - stepWidth)
+		{
+			turning = 1;
+		}
+	}
+
+	// Draw meat
+	draw(&meatCut, 0.6, 0.6, 0.6, 0.3, 0.15, 0.3, 0.988, 0.337, 0.337);
 }
 
 void DrawServeFood(void)
@@ -939,185 +1333,9 @@ void DrawServeFood(void)
 	glPopMatrix();					// Restore world coordinate system.
 }
 
-//Default model
-void neuesModell()
-{
-	glLoadIdentity;
-	glPushMatrix();					//Nullpunkt Weltkoord
-
-	glTranslatef(0.0, 0.1, 0.0);	//translate y +0.1
-	glRotatef(90.0, 0.0, 0.0, 1.0); //rotate 90 to left
-	glScalef(0.1, 0.1, 0.1);		//scale 0,1
-
-	glLineWidth(1.0);				//liniendicke
-	glColor3f(0.0, 0.0, 0.5);		//color
-
-	//***
-	//Modell
-	glBegin(GL_TRIANGLES);
-	glVertex3f(0, 0, 0);
-	glVertex3f(0, 1, 0);
-	glVertex3f(1, 1, 0);
-	glEnd();
-	//***
-
-	glPopMatrix();					// Restore world coordinate system.
-}
-
-void DrawArrow(static short direction)		// Rotating arrow
-{
-	glLoadIdentity;
-	glPushMatrix();						// Save world coordinate system.
-
-	if (direction == 1) //moving arrow in
-	{
-
-		// Place base of cube on marker surface.
-		glTranslatef(0.0, 0.0, 0.0);	// set to marker origin
-		glRotatef(90.0, 1.0, 1.0, 1.0); // rotate arrow
-
-		//moving the arrow
-		if (xmove_1 > 0.5)
-			xmove_1 = 0;
-		glTranslatef(xmove_1, 0.0, 0.0);	// move in the xmove_1 specifed range
-
-		//Select arrow color
-		glDisable(GL_LIGHTING);				// Just use colours.
-		glColor3f(1.0, 0.0, 0.0);
-		//Draw the arrow quader
-		glBegin(GL_POLYGON);				// Quader
-		glVertex3f(0.0, 0.0, 0.0);			// x, z, y
-		glVertex3f(0.0, 0.0, 0.25);
-		glVertex3f(1.5, 0.0, 0.25);
-		glVertex3f(1.5, 0.0, 0.0);
-		glEnd();
-		//draw the arrow triangle
-		glBegin(GL_TRIANGLES);				// Triangle
-		glVertex3f(1.5, 0.0, 0.375);
-		glVertex3f(2.0, 0.0, 0.125);
-		glVertex3f(1.5, 0.0, -0.125);
-		glEnd();
-		glPopMatrix();						// Restore world coordinate system.
-
-	}
-
-	if (direction == 2) //moving arrow out
-	{
-		glTranslatef(0.75, 0.0, -0.75);		// set base of the arrow (x, z , -y)
-		glRotatef(270.0, -1.0, -1.0, -1.0); // rotate arrow
-
-		//move the arrow
-		if (xmove_2 > 0.5)					// an dieser Stelle ist es überflüssig 2 mal move zu generieren, nur Abtrennungshalber existieren zwei
-			xmove_2 = 0;
-		glTranslatef(xmove_2, 0.0, 0.0);	// move in the xmove_2 specifed range
-
-		//Select arrow color
-		glDisable(GL_LIGHTING);				// Just use colours.
-		glColor3f(0.0, 1.0, 0.0);			// Green
-		//Draw the arrow quader
-		glBegin(GL_POLYGON);				//Quader
-		glVertex3f(0.0, 0.0, 0.0);			//x, z, y
-		glVertex3f(0.0, 0.0, 0.25);
-		glVertex3f(1.5, 0.0, 0.25);
-		glVertex3f(1.5, 0.0, 0.0);
-		glEnd();
-		//draw the arrow triangle
-		glBegin(GL_TRIANGLES);				//Dreieck
-		glVertex3f(0.0, 0.0, 0.375);
-		glVertex3f(-0.5, 0.0, 0.125);
-		glVertex3f(0.0, 0.0, -0.125);
-		glEnd();
-		glPopMatrix();						// Restore world coordinate system.
-	}
-
-}
-
-void DrawTeapot(void)				//Das zu "bearbeitende" Objekt, Teekanne 
-{
-	GLfloat   mat_ambient[] = { 0.0, 0.0, 1.0, 1.0 };
-	GLfloat   mat_flash[] = { 0.0, 0.0, 1.0, 1.0 };
-	GLfloat   mat_flash_shiny[] = { 50.0 };
-	GLfloat   light_position[] = { 100.0, -200.0, 200.0, 0.0 };
-	GLfloat   ambi[] = { 0.1, 0.1, 0.1, 0.1 };
-	GLfloat   lightZeroColor[] = { 0.9, 0.9, 0.9, 0.1 };
-
-	// set the material 
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, ambi);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, lightZeroColor);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_flash);
-	glMaterialfv(GL_FRONT, GL_SHININESS, mat_flash_shiny);
-	glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
-
-	glRotatef(90, 1.0, 0.0, 0.0);
-	glTranslatef(0.0, 1.0, 0.0);			// set a new position raltive to the detected marker centre x,-y,z
-
-	glutSolidTeapot(1);						// build a teapot
-
-	glDisable(GL_LIGHTING);
-}
-
-void DrawCheck()					// for state 4: Draw check
-{
-
-	glLineWidth(7.5);
-	glColor3f(0.0, 0.8, 0.4);			// Green
-	glBegin(GL_LINES);
-
-	glVertex3f(1, 1, 1.2);
-	glVertex3f(-0.5, -1, 1.2);
-	glEnd();
-	glBegin(GL_LINES);
-	glVertex3f(-0.5, -1, 1.2);
-	glVertex3f(-1, -0.25, 1.2);
-	glEnd();
-
-}
-
-void DrawCross()					// 
-{
-	glRotatef(crossmotion, 0.0, 1.0, 0.0); // Rotate about z axis.
-	glLineWidth(7.5);
-	glColor3f(1.0, 0.0, 0.0);			// Rot
-	glBegin(GL_LINES);					// front cross
-	glVertex3f(1.2, 1.9, 0.8);
-	glVertex3f(-1.2, 0, 1.9);
-	glEnd();
-	glBegin(GL_LINES);
-	glVertex3f(1.2, 0, 1.9);
-	glVertex3f(-1.2, 1.9, 0.8);
-	glEnd();
-	glBegin(GL_LINES);					// back cross
-	glVertex3f(1.2, 1.9, -0.8);
-	glVertex3f(-1.2, 0, -1.9);
-	glEnd();
-	glBegin(GL_LINES);
-	glVertex3f(1.2, 0, -1.9);
-	glVertex3f(-1.2, 1.9, -0.8);
-	glEnd();
-}
-
 //---- Updating functions in idl() loop --------------
 
-void ArrowMotion(float timeDelta)			// updating the moving arrow parameter by idle()
-{
-	if (state == 1)
-		xmove_1 = xmove_1 + 0.5f * timeDelta;
-	if (state == 2)
-		xmove_2 = xmove_2 + 0.5f * timeDelta;
-}
-
-void CrossMotion(float timeDelta)			// updating the crossmotion bei idle()
-{
-	crossmotion += timeDelta * 45.0f;		// Rotate Kreuz at 45 degrees per second.
-	if (crossmotion > 360.0f)
-		crossmotion -= 360.0f;
-}
-
 void drawText(const char* text, int length, int x, int y) // funtion to draw text
-
 {
 
 	glMatrixMode(GL_PROJECTION);
@@ -1156,7 +1374,7 @@ void drawText(const char* text, int length, int x, int y) // funtion to draw tex
 
 }
 
-void releaseModels()
+static void releaseModels()
 {
 	// free space to avoid ressource leakage (assimp)
 	aiReleaseImport(knife.scene);
@@ -1188,5 +1406,4 @@ void releaseModels()
 	aiReleaseImport(bowlInner.scene);
 	aiReleaseImport(spoon.scene);
 }
-
 #endif
