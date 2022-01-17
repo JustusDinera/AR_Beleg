@@ -221,7 +221,7 @@ void fsm()	// Finite state machine
 
 		//output text
 		std::string text;		// definition textstring
-		text = "Die fertige Suppe in eine Schuessel schoepfen und geniessen";			// text content
+		text = "Die fertige Suppe in eine Schuessel schoepfen und servieren";			// text content
 		glColor3f(1, 0, 0);		// text color e.g. (1,0,0 red)
 		drawText(text.data(), text.size(), 10, 10); //textstring, textlength (from xstring), position x,y (origin lower left 0,0)
 	}

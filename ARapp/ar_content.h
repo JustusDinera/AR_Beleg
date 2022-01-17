@@ -61,7 +61,8 @@ MODEL stove("../Models/stove.stl");
 MODEL stoveBlack("../Models/stoveBlack.stl");
 MODEL stoveDoor("../Models/stoveDoor.stl");
 
-MODEL table("../Models/table.obj");
+MODEL table("../Models/table.stl");
+
 MODEL bowlLower("../Models/bowlLower.stl");
 MODEL bowlUpper("../Models/bowlUpper.stl");
 MODEL bowlInner("../Models/bowlInner.stl");
