@@ -18,3 +18,6 @@ cd vcpkg
 ./vcpkg integrate install
 ./vcpkg install assimp
 ```
+## Empfehlung 
+Die Videoauflösung sollte mindestents 960x720 gewählt werden, dass eine ruhige Dastellung ermöglicht wird. 
+
