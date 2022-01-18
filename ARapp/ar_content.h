@@ -897,34 +897,4 @@ void drawText(const char* text, int length, int x, int y) // funtion to draw tex
 	glLoadMatrixd(matrix);
 	glMatrixMode(GL_MODELVIEW);
 }
-
-static void releaseModels()
-{
-	// free space to avoid ressource leakage (assimp)
-	aiReleaseImport(knife.scene);
-	aiReleaseImport(fish.scene);
-	aiReleaseImport(pot.scene);
-	aiReleaseImport(lid.scene);
-	aiReleaseImport(carrot.scene);
-	aiReleaseImport(carrotCut.scene);
-	aiReleaseImport(meatCut.scene);
-	aiReleaseImport(meat.scene);
-	aiReleaseImport(board.scene);
-	aiReleaseImport(potWater.scene);
-	aiReleaseImport(leekGreen.scene);
-	aiReleaseImport(leekWhite.scene);
-	aiReleaseImport(leekGreenCut.scene);
-	aiReleaseImport(leekWhiteCut.scene);
-	aiReleaseImport(sink.scene);
-	aiReleaseImport(sinkDoor.scene);
-	aiReleaseImport(sinkFaucet.scene);
-	aiReleaseImport(stove.scene);
-	aiReleaseImport(stoveBlack.scene);
-	aiReleaseImport(stoveDoor.scene);
-	aiReleaseImport(table.scene);
-	aiReleaseImport(bowlLower.scene);
-	aiReleaseImport(bowlUpper.scene);
-	aiReleaseImport(bowlInner.scene);
-	aiReleaseImport(spoon.scene);
-}
 #endif
