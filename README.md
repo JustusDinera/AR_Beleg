@@ -1,6 +1,11 @@
 # Beleg im Modul ELT04930 Augmented Reality Hardware
 ## Thema: Kochanleitung
 ----------
+## Voraussetzungen
+Das Projekt wurde unter:
+- Visual Studio 2019 Comunity Version erstellt und gestestet.  
+- ARtoolkit in der Version 3
+
 ## Installation
 Um das Programm kompilierne zu können ist das Opensource Bibliothek Assimp nötig. Diese kann als pre compiled binary über den Paketmanager VCPKG 
 
