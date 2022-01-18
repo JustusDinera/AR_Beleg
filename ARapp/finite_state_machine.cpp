@@ -1,6 +1,4 @@
 //--------------- Includes ------------------------------
-//#include "finite_state_machine.h"
-
 #include <string>
 #include <GL/glut.h>
 #include "ar_content.h"
@@ -194,6 +192,6 @@ void fsm()	// Finite state machine
 		text = "Die fertige Suppe in eine Schuessel schoepfen und servieren";			// text content
 	}
 
-	glColor3f(1, 0, 0);		// text color e.g. (1,0,0 red)
+	glColor3f(0, 0, 0);		// text color e.g. (0,0,0 black)
 	drawText(text.data(), text.size(), 10, 10); //textstring, textlength (from xstring), position x,y (origin lower left 0,0)
 }

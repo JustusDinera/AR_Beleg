@@ -30,12 +30,6 @@
     <ClInclude Include="..\ARToolkit\include\AR\video.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="model_loader.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="ModelTest.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ar_tracker.cpp">
@@ -48,12 +42,6 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="user_interface.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
-    <ClCompile Include="Quelle2.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
-    <ClCompile Include="Quelle.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
