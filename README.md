@@ -2,8 +2,7 @@
 ## Thema: Kochanleitung
 ----------
 ## Voraussetzungen
-Das Projekt wurde unter:
-- Visual Studio 2019 Comunity Version erstellt und gestestet.  
+- Visual Studio 2019 Comunity Version mit englischem Sprachpaket (Das Projekt wurde mit dieser Version erstellt und gestestet).  
 - ARtoolkit in der Version 3
 - Die Hiro Pattern
 - GitSCM oder ähnliches Tool muss installiert sein. <http://git-scm.com/downloads>
